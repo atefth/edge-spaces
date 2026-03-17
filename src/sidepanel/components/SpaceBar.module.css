@@ -1,14 +1,31 @@
 .wrapper {
-	background: linear-gradient(180deg, rgb(245 245 240 / 0.98) 0%, rgb(236 238 232 / 0.96) 100%);
+	background:
+		linear-gradient(180deg, rgb(255 255 255 / 0.42) 0%, rgb(255 255 255 / 0) 46%),
+		linear-gradient(180deg, rgb(245 245 240 / 0.98) 0%, rgb(236 238 232 / 0.96) 100%);
 	border-bottom: 1px solid var(--border-color);
-	padding: var(--spacing-md) var(--spacing-md) 0;
+	padding: var(--spacing-md) var(--spacing-md) var(--spacing-xs);
 	position: relative;
 	z-index: 10;
 }
 
+.headerRow {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	padding: 0 var(--spacing-xs) var(--spacing-sm);
+}
+
+.panelLabel {
+	color: var(--text-tertiary);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
 .scrollRegion {
 	overflow-x: auto;
-	padding-bottom: 1px;
+	padding-bottom: 3px;
 	scrollbar-width: none;
 }
 
@@ -19,7 +36,7 @@
 .tabList {
 	align-items: flex-end;
 	display: inline-flex;
-	gap: var(--spacing-xs);
+	gap: 6px;
 	min-width: 100%;
 	padding-right: var(--spacing-md);
 	white-space: nowrap;
@@ -27,35 +44,39 @@
 
 .tabShell {
 	--space-accent: var(--accent-green);
-	border-bottom: 2px solid transparent;
-	border-radius: var(--radius-md) var(--radius-md) 0 0;
 	flex: 0 0 auto;
-	max-width: 148px;
-	transition: border-color 140ms ease;
-}
-
-.tabShellActive {
-	border-bottom-color: var(--space-accent);
+	max-width: 156px;
+	position: relative;
 }
 
 .tab {
-	background: transparent;
+	background: rgb(255 255 255 / 0.18);
 	border: 0;
-	border-radius: var(--radius-md) var(--radius-md) 0 0;
+	border-radius: 12px;
+	box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.22);
 	cursor: pointer;
 	display: block;
 	font-size: var(--font-size-md);
 	font-weight: 600;
 	min-width: 88px;
-	padding: 10px 12px 8px;
+	overflow: hidden;
+	padding: 10px 12px 11px;
+	position: relative;
 	text-align: left;
-	transition: background-color 140ms ease, color 140ms ease;
+	transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 	width: 100%;
 }
 
-.tab:hover,
+.tab:hover {
+	background: rgb(255 255 255 / 0.3);
+	transform: translateY(-1px);
+}
+
 .tabActive {
-	background: var(--bg-hover);
+	background: rgb(255 255 255 / 0.54);
+	box-shadow:
+		inset 0 0 0 1px rgb(255 255 255 / 0.55),
+		0 8px 18px rgb(34 37 31 / 0.08);
 }
 
 .tabLabel {
@@ -65,30 +86,66 @@
 	white-space: nowrap;
 }
 
+.activeGlow {
+	background: radial-gradient(circle at center, color-mix(in srgb, var(--space-accent) 28%, transparent) 0%, transparent 72%);
+	inset: -14px 20% auto;
+	height: 26px;
+	pointer-events: none;
+	position: absolute;
+	transform: translateY(-8px);
+}
+
+.tabUnderline {
+	background: var(--space-accent);
+	border-radius: 999px;
+	bottom: 4px;
+	height: 2px;
+	left: 12px;
+	opacity: 0;
+	position: absolute;
+	right: 12px;
+	transform: scaleX(0.65);
+	transform-origin: center;
+	transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.tabActive .tabUnderline {
+	opacity: 1;
+	transform: scaleX(1);
+}
+
+.tabShellActive {
+	filter: saturate(1.04);
+}
+
 .addButton {
 	align-items: center;
-	background: transparent;
+	background: rgb(255 255 255 / 0.32);
 	border: 0;
-	border-radius: var(--radius-md);
+	border-radius: 999px;
+	box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
 	color: var(--text-secondary);
 	cursor: pointer;
 	display: inline-flex;
 	flex: 0 0 auto;
-	font-size: 22px;
-	height: 34px;
+	font-size: 20px;
+	font-weight: 400;
+	height: 30px;
 	justify-content: center;
 	line-height: 1;
-	margin-bottom: 2px;
-	width: 34px;
+	transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+	width: 30px;
 }
 
 .addButton:hover {
-	background: var(--bg-hover);
+	background: rgb(255 255 255 / 0.5);
 	color: var(--text-primary);
+	transform: translateY(-1px);
 }
 
 .contextMenu {
-	background: rgb(245 245 240 / 0.98);
+	backdrop-filter: blur(18px);
+	background: rgb(245 245 240 / 0.84);
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-lg);
 	box-shadow: var(--shadow-menu);
@@ -123,6 +180,14 @@
 	background: var(--bg-hover);
 }
 
+.menuItemDanger {
+	color: var(--accent-red);
+}
+
+.menuItemDanger:hover:not(:disabled) {
+	background: rgb(193 95 95 / 0.1);
+}
+
 .menuItem:disabled {
 	color: var(--text-tertiary);
 	cursor: not-allowed;
@@ -136,7 +201,8 @@
 }
 
 .submenu {
-	background: rgb(245 245 240 / 0.98);
+	backdrop-filter: blur(18px);
+	background: rgb(245 245 240 / 0.84);
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-lg);
 	box-shadow: var(--shadow-menu);
@@ -147,6 +213,11 @@
 	padding: var(--spacing-xs);
 	position: absolute;
 	top: -6px;
+}
+
+.submenuLeft {
+	left: auto;
+	right: calc(100% + var(--spacing-xs));
 }
 
 .colorOption {
@@ -167,6 +238,10 @@
 	background: var(--bg-hover);
 }
 
+.colorOptionActive {
+	background: rgb(255 255 255 / 0.56);
+}
+
 .colorDot {
 	border-radius: 999px;
 	box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08);
@@ -179,4 +254,11 @@
 	font-size: var(--font-size-md);
 	font-weight: 500;
 	line-height: 1;
+}
+
+.colorCheck {
+	color: var(--text-tertiary);
+	font-size: var(--font-size-sm);
+	font-weight: 700;
+	margin-left: auto;
 }

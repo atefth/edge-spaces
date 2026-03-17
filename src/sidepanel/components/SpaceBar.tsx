@@ -12,6 +12,7 @@ interface ContextMenuState {
 	spaceId: string;
 	x: number;
 	y: number;
+	openLeft: boolean;
 }
 
 function getAccentColor(color: SpaceColor): string {
@@ -26,7 +27,9 @@ export function SpaceBar() {
 	const renameSpace = useAppStore((state) => state.renameSpace);
 	const setActiveSpace = useAppStore((state) => state.setActiveSpace);
 	const setSpaceColor = useAppStore((state) => state.setSpaceColor);
+	const scrollRegionRef = useRef<HTMLDivElement>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
+	const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
 	const [editingSpaceId, setEditingSpaceId] = useState<string | null>(null);
 	const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 	const [showColorMenu, setShowColorMenu] = useState(false);
@@ -73,8 +76,42 @@ export function SpaceBar() {
 		};
 	}, [contextMenu]);
 
+	useEffect(() => {
+		const targetSpaceId = editingSpaceId ?? activeSpaceId;
+
+		if (!targetSpaceId) {
+			return;
+		}
+
+		tabRefs.current[targetSpaceId]?.scrollIntoView({
+			behavior: 'smooth',
+			block: 'nearest',
+			inline: 'center',
+		});
+	}, [activeSpaceId, editingSpaceId, spaces.length]);
+
 	function closeMenu() {
 		setContextMenu(null);
+		setShowColorMenu(false);
+	}
+
+	function openContextMenu(spaceId: string, x: number, y: number) {
+		const viewportWidth = window.innerWidth;
+		const viewportHeight = window.innerHeight;
+		const menuWidth = 188;
+		const menuHeight = 132;
+		const submenuWidth = 150;
+		const margin = 12;
+		const clampedX = Math.min(x, viewportWidth - menuWidth - margin);
+		const clampedY = Math.min(y, viewportHeight - menuHeight - margin);
+		const openLeft = viewportWidth - clampedX < menuWidth + submenuWidth + 40;
+
+		setContextMenu({
+			spaceId,
+			x: Math.max(margin, clampedX),
+			y: Math.max(margin, clampedY),
+			openLeft,
+		});
 		setShowColorMenu(false);
 	}
 
@@ -93,7 +130,13 @@ export function SpaceBar() {
 	return (
 		<>
 			<div className={styles.wrapper}>
-				<div className={styles.scrollRegion}>
+				<div className={styles.headerRow}>
+					<div className={styles.panelLabel}>Spaces</div>
+					<button type="button" className={styles.addButton} onClick={handleCreateSpace} aria-label="Create space">
+						+
+					</button>
+				</div>
+				<div ref={scrollRegionRef} className={styles.scrollRegion}>
 					<div className={styles.tabList} role="tablist" aria-label="Spaces">
 						{spaces.map((space) => {
 							const isActive = space.id === activeSpaceId;
@@ -102,6 +145,9 @@ export function SpaceBar() {
 							return (
 								<div
 									key={space.id}
+									ref={(node) => {
+										tabRefs.current[space.id] = node;
+									}}
 									className={`${styles.tabShell} ${isActive ? styles.tabShellActive : ''}`}
 									style={{ '--space-accent': getAccentColor(space.color) } as React.CSSProperties}
 								>
@@ -114,15 +160,11 @@ export function SpaceBar() {
 										onContextMenu={(event) => {
 											event.preventDefault();
 											setActiveSpace(space.id);
-											setContextMenu({
-												spaceId: space.id,
-												x: event.clientX,
-												y: event.clientY,
-											});
-											setShowColorMenu(false);
+											openContextMenu(space.id, event.clientX, event.clientY);
 										}}
 										onDoubleClick={() => setEditingSpaceId(space.id)}
 									>
+										{isActive ? <span className={styles.activeGlow} aria-hidden="true" /> : null}
 										{isEditing ? (
 											<InlineEdit
 												value={space.name}
@@ -133,15 +175,15 @@ export function SpaceBar() {
 												}}
 											/>
 										) : (
-											<span className={styles.tabLabel}>{space.name}</span>
+											<>
+												<span className={styles.tabLabel}>{space.name}</span>
+												<span className={styles.tabUnderline} aria-hidden="true" />
+											</>
 										)}
 									</button>
 								</div>
 							);
 						})}
-						<button type="button" className={styles.addButton} onClick={handleCreateSpace} aria-label="Create space">
-							+
-						</button>
 					</div>
 				</div>
 			</div>
@@ -163,7 +205,11 @@ export function SpaceBar() {
 					>
 						Rename
 					</button>
-					<div className={styles.menuGroup}>
+					<div
+						className={styles.menuGroup}
+						onMouseEnter={() => setShowColorMenu(true)}
+						onMouseLeave={() => setShowColorMenu(false)}
+					>
 						<button
 							type="button"
 							className={styles.menuItem}
@@ -173,12 +219,14 @@ export function SpaceBar() {
 							<span className={styles.menuHint}>›</span>
 						</button>
 						{showColorMenu ? (
-							<div className={styles.submenu}>
+							<div
+								className={`${styles.submenu} ${contextMenu.openLeft ? styles.submenuLeft : ''}`}
+							>
 								{SPACE_COLORS.map((color) => (
 									<button
 										key={color}
 										type="button"
-										className={styles.colorOption}
+										className={`${styles.colorOption} ${contextSpace.color === color ? styles.colorOptionActive : ''}`}
 										onClick={() => {
 											setSpaceColor(contextSpace.id, color);
 											closeMenu();
@@ -189,6 +237,7 @@ export function SpaceBar() {
 											style={{ backgroundColor: getAccentColor(color) }}
 										/>
 										<span className={styles.colorLabel}>{color}</span>
+										{contextSpace.color === color ? <span className={styles.colorCheck}>✓</span> : null}
 									</button>
 								))}
 							</div>
@@ -196,7 +245,7 @@ export function SpaceBar() {
 					</div>
 					<button
 						type="button"
-						className={styles.menuItem}
+						className={`${styles.menuItem} ${styles.menuItemDanger}`}
 						disabled={spaces.length <= 1}
 						onClick={() => {
 							setDeleteCandidate(contextSpace);

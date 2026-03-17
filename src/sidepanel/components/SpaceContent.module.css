@@ -1,4 +1,7 @@
 .content {
+	background:
+		radial-gradient(circle at top right, rgb(255 255 255 / 0.44) 0%, transparent 28%),
+		linear-gradient(180deg, rgb(255 255 255 / 0.08) 0%, transparent 24%);
 	display: flex;
 	flex: 1;
 	flex-direction: column;
@@ -28,9 +31,12 @@
 
 .placeholderCard,
 .emptyState {
-	background: rgb(255 255 255 / 0.36);
+	background:
+		linear-gradient(180deg, rgb(255 255 255 / 0.48) 0%, rgb(255 255 255 / 0.24) 100%),
+		rgb(255 255 255 / 0.24);
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-xl);
+	box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45);
 	min-height: 60px;
 	padding: var(--spacing-lg);
 }
@@ -51,14 +57,16 @@
 	flex: 1;
 	flex-direction: column;
 	justify-content: center;
+	min-height: 320px;
 	padding: var(--spacing-2xl) var(--spacing-xl);
 	text-align: center;
 }
 
 .emptyIcon {
-	background: linear-gradient(180deg, rgb(255 255 255 / 0.65) 0%, rgb(226 229 220 / 0.9) 100%);
+	background: linear-gradient(180deg, rgb(255 255 255 / 0.76) 0%, rgb(226 229 220 / 0.95) 100%);
 	border: 1px solid var(--border-color);
 	border-radius: 14px;
+	box-shadow: 0 14px 24px rgb(29 33 27 / 0.08);
 	height: 52px;
 	margin-bottom: var(--spacing-lg);
 	position: relative;
@@ -86,6 +94,8 @@
 
 .emptyMessage {
 	color: var(--text-secondary);
+	font-size: var(--font-size-md);
+	line-height: 1.5;
 	max-width: 280px;
 }
 
@@ -101,10 +111,12 @@
 .secondaryAction {
 	border: 0;
 	border-radius: 999px;
+	box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3);
 	cursor: pointer;
 	font-size: var(--font-size-md);
 	font-weight: 600;
 	padding: 10px 14px;
+	transition: transform 160ms ease, opacity 160ms ease, background-color 160ms ease;
 }
 
 .primaryAction {
@@ -113,6 +125,12 @@
 }
 
 .secondaryAction {
-	background: var(--bg-hover);
+	background: rgb(255 255 255 / 0.54);
 	color: var(--text-primary);
+}
+
+.primaryAction:hover,
+.secondaryAction:hover {
+	opacity: 0.96;
+	transform: translateY(-1px);
 }

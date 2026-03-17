@@ -1,5 +1,7 @@
 .sidebar {
-	background: var(--bg-primary);
+	background:
+		radial-gradient(circle at top center, rgb(255 255 255 / 0.55) 0%, transparent 22%),
+		var(--bg-primary);
 	display: flex;
 	flex: 1;
 	flex-direction: column;
