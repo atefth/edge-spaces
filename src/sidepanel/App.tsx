@@ -1,10 +1,7 @@
+import { Sidebar } from './components/Sidebar';
+
 function App() {
-  return (
-    <div className="sidebar">
-      <h1>Edge Spaces</h1>
-      <p>Sidebar loading...</p>
-    </div>
-  );
+  return <Sidebar />;
 }
 
 export default App;
