@@ -1,4 +1,5 @@
 import { useAppStore } from '../../shared/store';
+import { PinnedGrid } from './PinnedGrid';
 import styles from './SpaceContent.module.css';
 
 export function SpaceContent() {
@@ -11,7 +12,7 @@ export function SpaceContent() {
 		<div className={styles.content}>
 			<div className={styles.section}>
 				<div className={styles.sectionLabel}>Pinned Sites</div>
-				<div className={styles.placeholderCard}>Pinned grid coming next.</div>
+				<PinnedGrid activeSpaceId={activeSpaceId} pinnedSites={activeSpace?.pinnedSites ?? []} />
 			</div>
 
 			<div className={styles.section}>
