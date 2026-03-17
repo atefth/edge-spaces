@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { useAppStore } from '../../shared/store';
+import { ImportWizard } from './ImportWizard';
 import { SpaceBar } from './SpaceBar';
 import { SpaceContent } from './SpaceContent';
 import { TreeDndProvider } from './TreeDndProvider';
@@ -9,6 +10,7 @@ import styles from './Sidebar.module.css';
 export function Sidebar() {
 	const hydrate = useAppStore((state) => state.hydrate);
 	const [isHydrating, setIsHydrating] = useState(true);
+	const [isImportOpen, setIsImportOpen] = useState(false);
 
 	useEffect(() => {
 		let isMounted = true;
@@ -32,10 +34,11 @@ export function Sidebar() {
 				</div>
 			) : (
 				<TreeDndProvider>
-					<SpaceBar />
-					<SpaceContent />
+					<SpaceBar onOpenImport={() => setIsImportOpen(true)} />
+					<SpaceContent onOpenImport={() => setIsImportOpen(true)} />
 				</TreeDndProvider>
 			)}
+			{isImportOpen ? <ImportWizard onClose={() => setIsImportOpen(false)} /> : null}
 		</div>
 	);
 }

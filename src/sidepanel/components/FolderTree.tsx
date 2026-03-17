@@ -8,6 +8,9 @@ import { getSpaceRootDndId, getTreeItemDndId, useTreeDnd } from './TreeDndProvid
 import { TreeNode } from './TreeNode';
 import styles from './FolderTree.module.css';
 
+interface FolderTreeProps {
+	onOpenImport: () => void;
+}
 type EditingState =
 	| { itemId: string; mode: 'folder-name' }
 	| { itemId: string; mode: 'bookmark-name' }
@@ -18,6 +21,7 @@ interface FolderChoice {
 	id: string;
 	label: string;
 }
+
 
 function isBrowserBookmarkUrl(url: string): boolean {
 	return /^https?:\/\//i.test(url);
@@ -91,7 +95,7 @@ function flattenVisibleTreeIds(
 	});
 }
 
-export function FolderTree() {
+export function FolderTree({ onOpenImport }: FolderTreeProps) {
 	const spaces = useAppStore((state) => state.spaces);
 	const folders = useAppStore((state) => state.folders);
 	const bookmarks = useAppStore((state) => state.bookmarks);
@@ -256,10 +260,15 @@ export function FolderTree() {
 					data-tree-root="true"
 				>
 					<div className={styles.emptyTitle}>No bookmarks yet</div>
-					<p className={styles.emptyMessage}>Create a folder to start building this space.</p>
-					<button type="button" className={styles.emptyAction} onClick={createRootFolder}>
-						Add Folder
-					</button>
+					<p className={styles.emptyMessage}>Create a folder or import your Arc export to start building this space.</p>
+					<div className={styles.emptyActions}>
+						<button type="button" className={styles.emptyAction} onClick={createRootFolder}>
+							Add Folder
+						</button>
+						<button type="button" className={styles.emptySecondaryAction} onClick={onOpenImport}>
+							Import from Arc
+						</button>
+					</div>
 				</div>
 			) : (
 				<SortableContext items={visibleTreeIds} strategy={verticalListSortingStrategy}>

@@ -1,0 +1,277 @@
+.backdrop {
+	align-items: center;
+	background: var(--overlay-backdrop);
+	backdrop-filter: blur(4px);
+	display: flex;
+	inset: 0;
+	justify-content: center;
+	padding: var(--spacing-lg);
+	position: fixed;
+	z-index: 45;
+}
+
+.dialog {
+	background: linear-gradient(180deg, rgb(245 245 240 / 0.98) 0%, rgb(236 238 232 / 0.98) 100%);
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-xl);
+	box-shadow: var(--shadow-dialog);
+	max-height: min(720px, calc(100vh - 32px));
+	overflow: auto;
+	padding: var(--spacing-xl);
+	width: min(100%, 620px);
+}
+
+.dialog:focus {
+	outline: none;
+}
+
+.hiddenInput {
+	display: none;
+}
+
+.stepLayout {
+	display: grid;
+	gap: var(--spacing-lg);
+}
+
+.headerBlock {
+	display: grid;
+	gap: var(--spacing-xs);
+}
+
+.title {
+	font-size: 22px;
+	font-weight: 700;
+	letter-spacing: -0.03em;
+}
+
+.description {
+	color: var(--text-secondary);
+	line-height: 1.5;
+}
+
+.fileCard,
+.instructionsCard,
+.warningCard,
+.previewSection,
+.modeSection,
+.successCard {
+	background: rgb(255 255 255 / 0.52);
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-lg);
+	padding: var(--spacing-lg);
+}
+
+.fileCard,
+.instructionsCard,
+.warningCard,
+.previewSection,
+.modeSection {
+	display: grid;
+	gap: var(--spacing-sm);
+}
+
+.filePrompt,
+.instructionsTitle,
+.warningTitle,
+.sectionTitle {
+	font-size: var(--font-size-md);
+	font-weight: 700;
+	letter-spacing: 0.01em;
+}
+
+.instructionsList,
+.warningList {
+	color: var(--text-secondary);
+	display: grid;
+	gap: 6px;
+	margin-left: 18px;
+}
+
+.errorBanner {
+	background: rgb(193 95 95 / 0.08);
+	border: 1px solid rgb(193 95 95 / 0.18);
+	border-radius: var(--radius-md);
+	color: var(--accent-red);
+	padding: 10px 12px;
+}
+
+.summaryGrid {
+	display: grid;
+	gap: var(--spacing-sm);
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.summaryCard {
+	background: rgb(255 255 255 / 0.58);
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-lg);
+	display: grid;
+	gap: 2px;
+	padding: 14px;
+}
+
+.summaryValue {
+	font-size: 24px;
+	font-weight: 700;
+	letter-spacing: -0.04em;
+}
+
+.summaryLabel {
+	color: var(--text-secondary);
+	font-size: var(--font-size-sm);
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.previewTree {
+	display: grid;
+	gap: 4px;
+	max-height: 240px;
+	overflow: auto;
+	padding-right: 4px;
+}
+
+.treeNode {
+	display: grid;
+	gap: 4px;
+}
+
+.treeToggle {
+	align-items: center;
+	background: transparent;
+	border: 0;
+	border-radius: var(--radius-md);
+	cursor: pointer;
+	display: flex;
+	gap: 8px;
+	justify-content: flex-start;
+	padding: 7px 8px;
+	text-align: left;
+	width: 100%;
+}
+
+.treeToggle:hover {
+	background: var(--bg-hover);
+}
+
+.treeChevron {
+	color: var(--text-tertiary);
+	font-size: 11px;
+	width: 12px;
+}
+
+.treeLabel {
+	font-weight: 600;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.treeCount {
+	color: var(--text-secondary);
+	margin-left: auto;
+}
+
+.treeChildren {
+	border-left: 1px solid rgb(212 214 207 / 0.8);
+	display: grid;
+	gap: 4px;
+	margin-left: 10px;
+	padding-left: 10px;
+}
+
+.treeEmpty {
+	color: var(--text-tertiary);
+	padding: 0 8px 8px;
+}
+
+.modeOption {
+	align-items: center;
+	cursor: pointer;
+	display: flex;
+	gap: var(--spacing-sm);
+	padding: 4px 0;
+}
+
+.replaceWarning {
+	background: rgb(193 95 95 / 0.08);
+	border: 1px solid rgb(193 95 95 / 0.18);
+	border-radius: var(--radius-md);
+	color: var(--accent-red);
+	padding: 10px 12px;
+}
+
+.successCard {
+	display: grid;
+	gap: var(--spacing-sm);
+	padding-top: var(--spacing-md);
+}
+
+.successRow {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	padding: 4px 0;
+}
+
+.actions {
+	display: flex;
+	gap: var(--spacing-sm);
+	justify-content: flex-end;
+}
+
+.primaryButton,
+.secondaryButton {
+	border: 0;
+	border-radius: 999px;
+	cursor: pointer;
+	font-size: var(--font-size-md);
+	font-weight: 600;
+	padding: 10px 16px;
+	transition: transform 140ms ease, opacity 140ms ease, background-color 140ms ease;
+}
+
+.primaryButton {
+	background: var(--accent-blue);
+	color: #fff;
+}
+
+.secondaryButton {
+	background: var(--bg-hover);
+	color: var(--text-primary);
+}
+
+.primaryButton:hover:not(:disabled),
+.secondaryButton:hover:not(:disabled) {
+	opacity: 0.95;
+	transform: translateY(-1px);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+	cursor: wait;
+	opacity: 0.72;
+}
+
+@media (max-width: 640px) {
+	.dialog {
+		padding: var(--spacing-lg);
+		width: min(100%, 100%);
+	}
+
+	.summaryGrid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.actions {
+		flex-direction: column-reverse;
+	}
+
+	.primaryButton,
+	.secondaryButton {
+		width: 100%;
+	}
+	}

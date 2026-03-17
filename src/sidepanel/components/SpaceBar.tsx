@@ -17,6 +17,10 @@ interface ContextMenuState {
 	openLeft: boolean;
 }
 
+interface SpaceBarProps {
+	onOpenImport: () => void;
+}
+
 function getAccentColor(color: SpaceColor): string {
 	return `var(--accent-${color})`;
 }
@@ -98,7 +102,7 @@ function SpaceTab({
 	);
 }
 
-export function SpaceBar() {
+export function SpaceBar({ onOpenImport }: SpaceBarProps) {
 	const spaces = useAppStore((state) => state.spaces);
 	const activeSpaceId = useAppStore((state) => state.activeSpaceId);
 	const addSpace = useAppStore((state) => state.addSpace);
@@ -108,9 +112,11 @@ export function SpaceBar() {
 	const setSpaceColor = useAppStore((state) => state.setSpaceColor);
 	const scrollRegionRef = useRef<HTMLDivElement>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
+	const headerMenuRef = useRef<HTMLDivElement>(null);
 	const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
 	const [editingSpaceId, setEditingSpaceId] = useState<string | null>(null);
 	const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+	const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
 	const [showColorMenu, setShowColorMenu] = useState(false);
 	const [deleteCandidate, setDeleteCandidate] = useState<Space | null>(null);
 
@@ -128,22 +134,26 @@ export function SpaceBar() {
 	}, [editingSpaceId, spaces]);
 
 	useEffect(() => {
-		if (!contextMenu) {
+		if (!contextMenu && !isHeaderMenuOpen) {
 			return;
 		}
 
 		function handlePointerDown(event: MouseEvent) {
-			if (menuRef.current?.contains(event.target as Node)) {
+			const target = event.target as Node;
+
+			if (menuRef.current?.contains(target) || headerMenuRef.current?.contains(target)) {
 				return;
 			}
 
 			setContextMenu(null);
 			setShowColorMenu(false);
+			setIsHeaderMenuOpen(false);
 		}
 
 		function handleWindowBlur() {
 			setContextMenu(null);
 			setShowColorMenu(false);
+			setIsHeaderMenuOpen(false);
 		}
 
 		document.addEventListener('mousedown', handlePointerDown);
@@ -153,7 +163,7 @@ export function SpaceBar() {
 			document.removeEventListener('mousedown', handlePointerDown);
 			window.removeEventListener('blur', handleWindowBlur);
 		};
-	}, [contextMenu]);
+	}, [contextMenu, isHeaderMenuOpen]);
 
 	useEffect(() => {
 		const targetSpaceId = editingSpaceId ?? activeSpaceId;
@@ -191,6 +201,7 @@ export function SpaceBar() {
 			y: Math.max(margin, clampedY),
 			openLeft,
 		});
+		setIsHeaderMenuOpen(false);
 		setShowColorMenu(false);
 	}
 
@@ -211,9 +222,39 @@ export function SpaceBar() {
 			<div className={styles.wrapper}>
 				<div className={styles.headerRow}>
 					<div className={styles.panelLabel}>Spaces</div>
-					<button type="button" className={styles.addButton} onClick={handleCreateSpace} aria-label="Create space">
-						+
-					</button>
+					<div className={styles.headerActions}>
+						<div className={styles.headerMenuShell} ref={headerMenuRef}>
+							<button
+								type="button"
+								className={styles.menuButton}
+								onClick={() => {
+									setIsHeaderMenuOpen((current) => !current);
+									setContextMenu(null);
+									setShowColorMenu(false);
+								}}
+								aria-label="Open sidebar menu"
+							>
+								⋯
+							</button>
+							{isHeaderMenuOpen ? (
+								<div className={styles.headerMenu} role="menu">
+									<button
+										type="button"
+										className={styles.menuItem}
+										onClick={() => {
+											onOpenImport();
+											setIsHeaderMenuOpen(false);
+										}}
+									>
+										Import from Arc
+									</button>
+								</div>
+							) : null}
+						</div>
+						<button type="button" className={styles.addButton} onClick={handleCreateSpace} aria-label="Create space">
+							+
+						</button>
+					</div>
 				</div>
 				<div ref={scrollRegionRef} className={styles.scrollRegion}>
 					<div className={styles.tabList} role="tablist" aria-label="Spaces">

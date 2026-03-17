@@ -91,6 +91,13 @@
 	text-align: center;
 }
 
+.emptyActions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--spacing-sm);
+	justify-content: center;
+}
+
 .emptyStateDropTarget {
 	border-color: color-mix(in srgb, var(--accent-blue) 42%, var(--border-strong));
 	box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-blue) 12%, transparent);
@@ -112,6 +119,25 @@
 .emptyMessage {
 	color: var(--text-secondary);
 	max-width: 280px;
+}
+
+.emptySecondaryAction {
+	background: rgb(255 255 255 / 0.68);
+	border: 1px solid rgb(212 214 207 / 0.85);
+	border-radius: 999px;
+	box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.26);
+	color: var(--text-primary);
+	cursor: pointer;
+	font-size: var(--font-size-md);
+	font-weight: 600;
+	min-height: 34px;
+	padding: 0 14px;
+	transition: transform 140ms ease, opacity 140ms ease, background-color 140ms ease;
+}
+
+.emptySecondaryAction:hover {
+	opacity: 0.96;
+	transform: translateY(-1px);
 }
 
 .toast {
