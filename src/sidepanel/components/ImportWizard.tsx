@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import {
 	ArcImportParser,
@@ -285,8 +286,8 @@ export function ImportWizard({ onClose }: ImportWizardProps) {
 		setStep(3);
 	}
 
-	return (
-		<div className={styles.backdrop} onMouseDown={onClose}>
+	return createPortal(
+		<div className={styles.backdrop} onMouseDown={onClose} style={{ zIndex: 2147483647, display: 'flex' }}>
 			<div
 				ref={dialogRef}
 				role="dialog"
@@ -294,6 +295,7 @@ export function ImportWizard({ onClose }: ImportWizardProps) {
 				aria-labelledby={titleId}
 				tabIndex={-1}
 				className={styles.dialog}
+				style={{ zIndex: 2147483647, position: 'relative' }}
 				onMouseDown={(event) => event.stopPropagation()}
 			>
 				<input
@@ -400,6 +402,7 @@ export function ImportWizard({ onClose }: ImportWizardProps) {
 					</div>
 				) : null}
 			</div>
-		</div>
+		</div>,
+		document.body
 	);
 }

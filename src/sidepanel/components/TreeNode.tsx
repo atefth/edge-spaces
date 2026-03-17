@@ -134,6 +134,7 @@ export function TreeNode({
 									onStartBookmarkForm={onStartBookmarkForm}
 									onStartFolderRename={onStartFolderRename}
 									onStartBookmarkRename={onStartBookmarkRename}
+									getTreeItemProps={getTreeItemProps}
 								/>
 							);
 						})}

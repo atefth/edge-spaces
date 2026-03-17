@@ -79,16 +79,33 @@ export function Sidebar() {
 				}
 			}}
 		>
-			{isHydrating ? (
-				<div className={styles.loadingState}>
-					<div className={styles.loadingLabel}>Loading spaces...</div>
-				</div>
-			) : (
-				<TreeDndProvider>
-					<SpaceBar onOpenImport={() => setIsImportOpen(true)} />
-					<SpaceContent ref={searchInputRef} onOpenImport={() => setIsImportOpen(true)} />
-				</TreeDndProvider>
-			)}
+			<div
+				className={styles.sidebarContent}
+				style={{ 
+					pointerEvents: isImportOpen ? 'none' : undefined,
+					userSelect: isImportOpen ? 'none' : undefined,
+					display: 'flex',
+					flexDirection: 'column',
+					flex: 1,
+					minHeight: '100vh',
+					filter: isImportOpen ? 'blur(8px)' : undefined,
+					transition: 'filter 200ms ease',
+					position: isImportOpen ? 'relative' : undefined,
+					zIndex: isImportOpen ? -100 : undefined
+				}}
+				aria-hidden={isImportOpen}
+			>
+				{isHydrating ? (
+					<div className={styles.loadingState}>
+						<div className={styles.loadingLabel}>Loading spaces...</div>
+					</div>
+				) : (
+					<TreeDndProvider>
+						<SpaceBar onOpenImport={() => setIsImportOpen(true)} />
+						<SpaceContent ref={searchInputRef} onOpenImport={() => setIsImportOpen(true)} />
+					</TreeDndProvider>
+				)}
+			</div>
 			{isImportOpen ? <ImportWizard onClose={() => setIsImportOpen(false)} /> : null}
 		</div>
 	);
