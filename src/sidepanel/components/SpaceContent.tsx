@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { forwardRef, useRef } from 'react';
 
 import { useAppStore } from '../../shared/store';
 import { FolderTree } from './FolderTree';
@@ -11,15 +11,19 @@ interface SpaceContentProps {
 	onOpenImport: () => void;
 }
 
-export function SpaceContent({ onOpenImport }: SpaceContentProps) {
+export const SpaceContent = forwardRef<HTMLInputElement, SpaceContentProps>(function SpaceContent(
+	{ onOpenImport },
+	searchInputRef,
+) {
 	const spaces = useAppStore((state) => state.spaces);
 	const activeSpaceId = useAppStore((state) => state.activeSpaceId);
 	const searchQuery = useAppStore((state) => state.searchQuery);
 	const activeSpace = spaces.find((space) => space.id === activeSpaceId) ?? null;
 	const searchResultsRef = useRef<SearchResultsHandle>(null);
+    const activeTabId = activeSpaceId ? `space-tab-${activeSpaceId}` : undefined;
 
 	return (
-		<div className={styles.content}>
+		<div className={styles.content} role="tabpanel" aria-labelledby={activeTabId} data-view={searchQuery.trim() ? 'search' : 'tree'}>
 			<div className={styles.section}>
 				<div className={styles.sectionLabel}>Pinned Sites</div>
 				<PinnedGrid activeSpaceId={activeSpaceId} pinnedSites={activeSpace?.pinnedSites ?? []} />
@@ -27,7 +31,7 @@ export function SpaceContent({ onOpenImport }: SpaceContentProps) {
 
 			<div className={styles.section}>
 				<div className={styles.sectionLabel}>Search</div>
-				<SearchBar onArrowDown={() => searchResultsRef.current?.focusFirstResult()} />
+				<SearchBar ref={searchInputRef} onArrowDown={() => searchResultsRef.current?.focusFirstResult()} />
 			</div>
 
 			<div className={styles.sectionGrow}>
@@ -40,4 +44,4 @@ export function SpaceContent({ onOpenImport }: SpaceContentProps) {
 			</div>
 		</div>
 	);
-}
+});

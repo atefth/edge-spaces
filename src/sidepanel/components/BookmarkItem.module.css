@@ -7,11 +7,16 @@
 	min-height: 28px;
 	padding: 3px 6px 3px calc((var(--node-depth) * var(--tree-indent)) + 24px);
 	position: relative;
-	transition: background-color 140ms ease;
+	transition: background-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
 .row:hover {
 	background: var(--bg-hover);
+}
+
+.row[data-focused='true'] {
+	background: color-mix(in srgb, var(--accent-current) 10%, transparent);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-current) 26%, transparent);
 }
 
 .leading {
@@ -71,7 +76,7 @@
 	font-size: 11px;
 	opacity: 0;
 	transform: translateY(-2px);
-	transition: opacity 140ms ease, transform 140ms ease;
+	transition: opacity var(--transition-fast), transform var(--transition-fast);
 }
 
 .row:hover .url,
@@ -88,7 +93,7 @@
 	height: 24px;
 	justify-content: center;
 	opacity: 0;
-	transition: opacity 140ms ease, background-color 140ms ease;
+	transition: opacity var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
 	width: 24px;
 }
 
@@ -100,7 +105,7 @@
 .menuButton:hover,
 .menuButton:focus-visible {
 	background: rgb(255 255 255 / 0.52);
-	outline: none;
+	color: var(--text-primary);
 }
 
 .formShell {
@@ -158,8 +163,8 @@
 }
 
 .formPrimaryButton {
-	background: var(--accent-green);
-	color: #fff;
+	background: var(--accent-current);
+	color: var(--text-inverse);
 }
 
 .formSecondaryButton {

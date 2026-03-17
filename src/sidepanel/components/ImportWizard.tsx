@@ -387,7 +387,8 @@ export function ImportWizard({ onClose }: ImportWizardProps) {
 							<h2 id={titleId} className={styles.title}>Import Complete</h2>
 							<p className={styles.description}>Your Arc bookmarks were imported into Edge Spaces.</p>
 						</div>
-						<div className={styles.successCard}>
+						<div className={styles.successCard} aria-live="polite" aria-atomic="true">
+							<div className={styles.srOnly}>Import complete: {summary.bookmarks} bookmarks imported.</div>
 							<div className={styles.successRow}><span>Spaces</span><strong>{summary.spaces}</strong></div>
 							<div className={styles.successRow}><span>Folders</span><strong>{summary.folders}</strong></div>
 							<div className={styles.successRow}><span>Bookmarks</span><strong>{summary.bookmarks}</strong></div>

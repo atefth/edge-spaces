@@ -7,11 +7,16 @@
 	min-height: 28px;
 	padding: 2px 6px 2px calc((var(--node-depth) * var(--tree-indent)) + 4px);
 	position: relative;
-	transition: background-color 140ms ease;
+	transition: background-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
 .row:hover {
 	background: var(--bg-hover);
+}
+
+.row[data-focused='true'] {
+	background: color-mix(in srgb, var(--accent-current) 10%, transparent);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-current) 26%, transparent);
 }
 
 .chevronButton,
@@ -37,12 +42,18 @@
 	background: rgb(255 255 255 / 0.45);
 }
 
+.chevronButton:focus-visible,
+.labelButton:focus-visible,
+.menuButton:focus-visible {
+	outline: none;
+}
+
 .chevron {
 	color: var(--text-secondary);
 	font-size: 16px;
 	line-height: 1;
 	transform: rotate(0deg);
-	transition: transform 160ms ease;
+	transition: transform var(--transition-fast);
 }
 
 .chevronButtonExpanded .chevron {
@@ -62,7 +73,7 @@
 }
 
 .folderIcon {
-	color: var(--accent-orange);
+	color: color-mix(in srgb, var(--accent-current) 42%, var(--space-orange));
 	flex: none;
 	height: 16px;
 	width: 16px;
@@ -91,7 +102,7 @@
 	height: 24px;
 	justify-content: center;
 	opacity: 0;
-	transition: opacity 140ms ease, background-color 140ms ease;
+	transition: opacity var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
 	width: 24px;
 }
 
@@ -103,5 +114,5 @@
 .menuButton:hover,
 .menuButton:focus-visible {
 	background: rgb(255 255 255 / 0.52);
-	outline: none;
+	color: var(--text-primary);
 }

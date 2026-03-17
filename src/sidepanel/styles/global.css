@@ -17,13 +17,16 @@ html {
 }
 
 body {
-  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--accent-current) 10%, transparent) 0%, transparent 28%),
+    linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
   color: var(--text-primary);
   font-family: var(--font-family);
   font-size: var(--font-size-md);
   line-height: 1.4;
   min-width: 320px;
   overflow-y: auto;
+  transition: background var(--transition-slow), color var(--transition-normal);
 }
 
 body::-webkit-scrollbar {
@@ -54,8 +57,14 @@ select {
   font: inherit;
 }
 
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--border-focus) 72%, transparent);
+  outline-offset: 2px;
+}
+
 #root {
   display: flex;
+  min-height: 100vh;
 }
 
 .sidebar {
@@ -75,4 +84,15 @@ select {
 
 .sidebar p {
   color: var(--text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -6,6 +6,7 @@
 	justify-content: center;
 	padding: var(--spacing-lg);
 	position: fixed;
+	animation: backdrop-fade var(--transition-normal);
 	z-index: 40;
 }
 
@@ -16,6 +17,7 @@
 	box-shadow: var(--shadow-dialog);
 	max-width: 360px;
 	padding: var(--spacing-xl);
+	animation: dialog-enter var(--transition-normal);
 	width: min(100%, 360px);
 }
 
@@ -64,13 +66,13 @@
 }
 
 .primaryButton {
-	background: var(--accent-blue);
-	color: #fff;
+	background: var(--accent-current);
+	color: var(--text-inverse);
 }
 
 .destructiveButton {
-	background: var(--accent-red);
-	color: #fff;
+	background: var(--color-danger);
+	color: var(--text-inverse);
 }
 
 .secondaryButton:hover,
@@ -78,4 +80,26 @@
 .destructiveButton:hover {
 	opacity: 0.94;
 	transform: translateY(-1px);
+}
+
+@keyframes backdrop-fade {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes dialog-enter {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }

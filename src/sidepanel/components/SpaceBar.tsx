@@ -2,7 +2,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAppStore } from '../../shared/store';
-import type { Space, SpaceColor } from '../../shared/types';
+import type { Space, SpaceColor, ThemePreference } from '../../shared/types';
 import { ConfirmDialog } from './ConfirmDialog';
 import { InlineEdit } from './InlineEdit';
 import { getSpaceTabDndId, useTreeDnd } from './TreeDndProvider';
@@ -22,8 +22,10 @@ interface SpaceBarProps {
 }
 
 function getAccentColor(color: SpaceColor): string {
-	return `var(--accent-${color})`;
+	return `var(--space-${color})`;
 }
+
+const THEMES: ThemePreference[] = ['auto', 'light', 'dark'];
 
 interface SpaceTabProps {
 	space: Space;
@@ -69,6 +71,7 @@ function SpaceTab({
 			style={{ '--space-accent': getAccentColor(space.color) } as React.CSSProperties}
 		>
 			<button
+				id={`space-tab-${space.id}`}
 				type="button"
 				role="tab"
 				aria-describedby={activeItem ? instructionsId : undefined}
@@ -105,11 +108,13 @@ function SpaceTab({
 export function SpaceBar({ onOpenImport }: SpaceBarProps) {
 	const spaces = useAppStore((state) => state.spaces);
 	const activeSpaceId = useAppStore((state) => state.activeSpaceId);
+	const theme = useAppStore((state) => state.theme);
 	const addSpace = useAppStore((state) => state.addSpace);
 	const deleteSpace = useAppStore((state) => state.deleteSpace);
 	const renameSpace = useAppStore((state) => state.renameSpace);
 	const setActiveSpace = useAppStore((state) => state.setActiveSpace);
 	const setSpaceColor = useAppStore((state) => state.setSpaceColor);
+	const setTheme = useAppStore((state) => state.setTheme);
 	const scrollRegionRef = useRef<HTMLDivElement>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
 	const headerMenuRef = useRef<HTMLDivElement>(null);
@@ -232,9 +237,9 @@ export function SpaceBar({ onOpenImport }: SpaceBarProps) {
 									setContextMenu(null);
 									setShowColorMenu(false);
 								}}
-								aria-label="Open sidebar menu"
+								aria-label="Open sidebar settings"
 							>
-								⋯
+								<span aria-hidden="true">⚙</span>
 							</button>
 							{isHeaderMenuOpen ? (
 								<div className={styles.headerMenu} role="menu">
@@ -248,6 +253,21 @@ export function SpaceBar({ onOpenImport }: SpaceBarProps) {
 									>
 										Import from Arc
 									</button>
+									<div className={styles.menuSectionLabel}>Theme</div>
+									{THEMES.map((candidateTheme) => (
+										<button
+											key={candidateTheme}
+											type="button"
+											className={`${styles.menuItem} ${theme === candidateTheme ? styles.menuItemSelected : ''}`}
+											onClick={() => {
+												setTheme(candidateTheme);
+												setIsHeaderMenuOpen(false);
+											}}
+										>
+											<span>{candidateTheme[0].toUpperCase() + candidateTheme.slice(1)}</span>
+											{theme === candidateTheme ? <span className={styles.menuSelectedMark}>✓</span> : null}
+										</button>
+									))}
 								</div>
 							) : null}
 						</div>

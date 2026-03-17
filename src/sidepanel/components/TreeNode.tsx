@@ -1,4 +1,5 @@
 import { useSortable } from '@dnd-kit/sortable';
+import type { HTMLAttributes } from 'react';
 
 import { useAppStore } from '../../shared/store';
 import type { TreeItemType } from '../../shared/types';
@@ -22,6 +23,7 @@ interface TreeNodeProps {
 	onStartBookmarkForm: (itemId: string) => void;
 	onClearEditing: () => void;
 	onShowStatus: (message: string) => void;
+	getTreeItemProps: (itemId: string) => HTMLAttributes<HTMLDivElement> & { tabIndex: number; 'aria-selected': boolean };
 }
 
 export function TreeNode({
@@ -34,6 +36,7 @@ export function TreeNode({
 	onStartBookmarkForm,
 	onClearEditing,
 	onShowStatus,
+	getTreeItemProps,
 }: TreeNodeProps) {
 	const folders = useAppStore((state) => state.folders);
 	const bookmarks = useAppStore((state) => state.bookmarks);
@@ -68,10 +71,12 @@ export function TreeNode({
 	const rowAttributes = {
 		...attributes,
 		...listeners,
+		...getTreeItemProps(itemId),
 		'aria-describedby': instructionsId,
 		'aria-label': itemType === 'folder' ? 'Draggable folder row' : 'Draggable bookmark row',
 		'aria-roledescription': 'sortable item',
 		'data-tree-item-id': itemId,
+		'data-focused': getTreeItemProps(itemId)['aria-selected'] ? 'true' : 'false',
 	};
 
 	if (itemType === 'folder') {
@@ -87,7 +92,13 @@ export function TreeNode({
 					folderId={folder.id}
 					depth={depth}
 					isEditing={editingState?.itemId === folder.id && editingState.mode === 'folder-name'}
-					rowAttributes={{ ...rowAttributes, 'data-folder-id': folder.id }}
+					rowAttributes={{
+						...rowAttributes,
+						role: 'treeitem',
+						'aria-expanded': folder.expanded,
+						'aria-level': depth + 1,
+						'data-folder-id': folder.id,
+					}}
 					rowClassName={rowClassName}
 					rowRef={setNodeRef}
 					rowStyle={rowStyle}
@@ -98,8 +109,8 @@ export function TreeNode({
 					onStartFolderRename={onStartFolderRename}
 				/>
 
-				{folder.expanded ? (
-					<div className={styles.children}>
+				<div className={`${styles.children} ${folder.expanded ? styles.childrenExpanded : ''}`} role="group">
+					<div className={styles.childrenInner}>
 						{folder.childIds.map((childId) => {
 							const childType: TreeItemType | null = folders[childId]
 								? 'folder'
@@ -127,7 +138,7 @@ export function TreeNode({
 							);
 						})}
 					</div>
-				) : null}
+				</div>
 			</div>
 		);
 	}
@@ -144,7 +155,7 @@ export function TreeNode({
 			depth={depth}
 			isEditingForm={editingState?.itemId === bookmark.id && editingState.mode === 'bookmark-form'}
 			isRenaming={editingState?.itemId === bookmark.id && editingState.mode === 'bookmark-name'}
-			rowAttributes={rowAttributes}
+			rowAttributes={{ ...rowAttributes, role: 'treeitem', 'aria-level': depth + 1 }}
 			rowClassName={rowClassName}
 			rowRef={setNodeRef}
 			rowStyle={rowStyle}

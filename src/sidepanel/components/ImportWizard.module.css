@@ -7,6 +7,7 @@
 	justify-content: center;
 	padding: var(--spacing-lg);
 	position: fixed;
+	animation: backdrop-fade var(--transition-normal);
 	z-index: 45;
 }
 
@@ -18,6 +19,7 @@
 	max-height: min(720px, calc(100vh - 32px));
 	overflow: auto;
 	padding: var(--spacing-xl);
+	animation: dialog-enter var(--transition-normal);
 	width: min(100%, 620px);
 }
 
@@ -27,6 +29,19 @@
 
 .hiddenInput {
 	display: none;
+}
+
+.srOnly {
+	border: 0;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
 }
 
 .stepLayout {
@@ -235,8 +250,8 @@
 }
 
 .primaryButton {
-	background: var(--accent-blue);
-	color: #fff;
+	background: var(--accent-current);
+	color: var(--text-inverse);
 }
 
 .secondaryButton {
@@ -274,4 +289,26 @@
 	.secondaryButton {
 		width: 100%;
 	}
+}
+
+@keyframes backdrop-fade {
+	from {
+		opacity: 0;
 	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes dialog-enter {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}

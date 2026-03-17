@@ -389,7 +389,7 @@ export function PinnedGrid({ activeSpaceId, pinnedSites }: PinnedGridProps) {
 				</DragOverlay>
 			</DndContext>
 
-			{statusMessage ? <div className={styles.toast}>{statusMessage}</div> : null}
+			{statusMessage ? <div className={styles.toast} role="status">{statusMessage}</div> : null}
 
 			{contextMenu ? (
 				<div

@@ -12,6 +12,19 @@
 	position: relative;
 }
 
+.srOnly {
+	border: 0;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
 .toolbar {
 	display: flex;
 	flex-wrap: wrap;
@@ -35,8 +48,8 @@
 
 .primaryButton,
 .emptyAction {
-	background: var(--accent-green);
-	color: #fff;
+	background: var(--accent-current);
+	color: var(--text-inverse);
 }
 
 .secondaryButton {
@@ -67,8 +80,8 @@
 }
 
 .rootDropZoneActive {
-	background: color-mix(in srgb, var(--accent-blue) 80%, transparent);
-	box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-blue) 22%, transparent);
+	background: color-mix(in srgb, var(--accent-current) 80%, transparent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-current) 22%, transparent);
 	opacity: 1;
 }
 
@@ -99,9 +112,9 @@
 }
 
 .emptyStateDropTarget {
-	border-color: color-mix(in srgb, var(--accent-blue) 42%, var(--border-strong));
-	box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-blue) 12%, transparent);
-	background: color-mix(in srgb, var(--accent-blue) 6%, rgb(255 255 255 / 0.22));
+	border-color: color-mix(in srgb, var(--accent-current) 42%, var(--border-strong));
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-current) 12%, transparent);
+	background: color-mix(in srgb, var(--accent-current) 6%, rgb(255 255 255 / 0.22));
 }
 
 .emptyStateDropInvalid {

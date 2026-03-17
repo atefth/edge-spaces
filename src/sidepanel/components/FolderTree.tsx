@@ -3,9 +3,12 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAppStore } from '../../shared/store';
+import type { TreeItemType } from '../../shared/types';
+import { ConfirmDialog } from './ConfirmDialog';
 import { ContextMenu, type ContextMenuItem } from './ContextMenu';
 import { getSpaceRootDndId, getTreeItemDndId, useTreeDnd } from './TreeDndProvider';
 import { TreeNode } from './TreeNode';
+import { useKeyboardNavigation } from './useKeyboardNavigation';
 import styles from './FolderTree.module.css';
 
 interface FolderTreeProps {
@@ -20,6 +23,12 @@ type EditingState =
 interface FolderChoice {
 	id: string;
 	label: string;
+}
+
+interface DeleteCandidate {
+	itemId: string;
+	itemType: TreeItemType;
+	nextFocusId: string | null;
 }
 
 
@@ -76,19 +85,43 @@ function flattenFolderChoices(
 	});
 }
 
-function flattenVisibleTreeIds(
+function flattenVisibleTreeItems(
 	itemIds: string[],
 	folders: ReturnType<typeof useAppStore.getState>['folders'],
 	bookmarks: ReturnType<typeof useAppStore.getState>['bookmarks'],
-): string[] {
+): Array<{
+	id: string;
+	itemType: TreeItemType;
+	parentId: string | null;
+	spaceId: string;
+	expanded?: boolean;
+	childIds?: string[];
+}> {
 	return itemIds.flatMap((itemId) => {
 		if (folders[itemId]) {
 			const folder = folders[itemId];
-			return [getTreeItemDndId(folder.id), ...(folder.expanded ? flattenVisibleTreeIds(folder.childIds, folders, bookmarks) : [])];
+			return [
+				{
+					id: folder.id,
+					itemType: 'folder' as const,
+					parentId: folder.parentId,
+					spaceId: folder.spaceId,
+					expanded: folder.expanded,
+					childIds: folder.childIds,
+				},
+				...(folder.expanded ? flattenVisibleTreeItems(folder.childIds, folders, bookmarks) : []),
+			];
 		}
 
 		if (bookmarks[itemId]) {
-			return [getTreeItemDndId(itemId)];
+			return [
+				{
+					id: itemId,
+					itemType: 'bookmark' as const,
+					parentId: bookmarks[itemId].parentId,
+					spaceId: bookmarks[itemId].spaceId,
+				},
+			];
 		}
 
 		return [];
@@ -102,10 +135,14 @@ export function FolderTree({ onOpenImport }: FolderTreeProps) {
 	const activeSpaceId = useAppStore((state) => state.activeSpaceId);
 	const addFolder = useAppStore((state) => state.addFolder);
 	const addBookmark = useAppStore((state) => state.addBookmark);
+	const deleteBookmark = useAppStore((state) => state.deleteBookmark);
+	const deleteFolder = useAppStore((state) => state.deleteFolder);
 	const { activeItem, preview } = useTreeDnd();
 	const activeSpace = spaces.find((space) => space.id === activeSpaceId) ?? null;
 	const toastTimeoutRef = useRef<number | null>(null);
+	const previousEditingStateRef = useRef<EditingState | null>(null);
 	const [editingState, setEditingState] = useState<EditingState>(null);
+	const [deleteCandidate, setDeleteCandidate] = useState<DeleteCandidate | null>(null);
 	const [folderPicker, setFolderPicker] = useState<{ items: ContextMenuItem[]; x: number; y: number } | null>(null);
 	const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
@@ -113,10 +150,11 @@ export function FolderTree({ onOpenImport }: FolderTreeProps) {
 		() => (activeSpace ? flattenFolderChoices(activeSpace.rootFolderIds, folders) : []),
 		[activeSpace, folders],
 	);
-	const visibleTreeIds = useMemo(
-		() => (activeSpace ? flattenVisibleTreeIds(activeSpace.rootFolderIds, folders, bookmarks) : []),
+	const visibleTreeItems = useMemo(
+		() => (activeSpace ? flattenVisibleTreeItems(activeSpace.rootFolderIds, folders, bookmarks) : []),
 		[activeSpace, bookmarks, folders],
 	);
+	const visibleTreeIds = useMemo(() => visibleTreeItems.map((item) => getTreeItemDndId(item.id)), [visibleTreeItems]);
 	const { setNodeRef: setRootDropRef, isOver: isRootDropHovered } = useDroppable({
 		id: getSpaceRootDndId(activeSpaceId),
 		data: {
@@ -151,7 +189,27 @@ export function FolderTree({ onOpenImport }: FolderTreeProps) {
 	useEffect(() => {
 		setEditingState(null);
 		setFolderPicker(null);
+		setDeleteCandidate(null);
 	}, [activeSpaceId]);
+
+	const { focusItem, getTreeItemProps, getTreeProps } = useKeyboardNavigation({
+		items: visibleTreeItems,
+		editingItemId: editingState?.itemId ?? null,
+		onStartFolderRename: (itemId) => setEditingState({ itemId, mode: 'folder-name' }),
+		onStartBookmarkRename: (itemId) => setEditingState({ itemId, mode: 'bookmark-name' }),
+		onStartBookmarkForm: (itemId) => setEditingState({ itemId, mode: 'bookmark-form' }),
+		onRequestDelete: setDeleteCandidate,
+		onShowStatus: showStatus,
+	});
+
+	useEffect(() => {
+		const previousEditingState = previousEditingStateRef.current;
+		previousEditingStateRef.current = editingState;
+
+		if (previousEditingState && !editingState) {
+			focusItem(previousEditingState.itemId);
+		}
+	}, [editingState, focusItem]);
 
 	function showStatus(message: string) {
 		setStatusMessage(message);
@@ -272,7 +330,14 @@ export function FolderTree({ onOpenImport }: FolderTreeProps) {
 				</div>
 			) : (
 				<SortableContext items={visibleTreeIds} strategy={verticalListSortingStrategy}>
-					<div className={styles.tree} tabIndex={-1} data-tree-root="true">
+					<div
+						className={styles.tree}
+						tabIndex={-1}
+						data-tree-root="true"
+						role="tree"
+						aria-label="Bookmarks"
+						{...getTreeProps()}
+					>
 						{activeSpace.rootFolderIds.map((folderId) => (
 							<TreeNode
 								key={folderId}
@@ -285,6 +350,7 @@ export function FolderTree({ onOpenImport }: FolderTreeProps) {
 								onStartBookmarkForm={(itemId) => setEditingState({ itemId, mode: 'bookmark-form' })}
 								onStartFolderRename={(itemId) => setEditingState({ itemId, mode: 'folder-name' })}
 								onStartBookmarkRename={(itemId) => setEditingState({ itemId, mode: 'bookmark-name' })}
+								getTreeItemProps={getTreeItemProps}
 							/>
 						))}
 						<div
@@ -296,13 +362,41 @@ export function FolderTree({ onOpenImport }: FolderTreeProps) {
 				</SortableContext>
 			)}
 
-			{statusMessage ? <div className={styles.toast}>{statusMessage}</div> : null}
+			<div className={styles.srOnly} aria-live="polite" aria-atomic="true">
+				{statusMessage}
+			</div>
+
+			{statusMessage ? <div className={styles.toast} role="status">{statusMessage}</div> : null}
 
 			{folderPicker ? (
 				<ContextMenu
 					items={folderPicker.items}
 					position={{ x: folderPicker.x, y: folderPicker.y }}
 					onClose={() => setFolderPicker(null)}
+				/>
+			) : null}
+
+			{deleteCandidate ? (
+				<ConfirmDialog
+					title={deleteCandidate.itemType === 'folder' ? 'Delete folder?' : 'Delete bookmark?'}
+					message={deleteCandidate.itemType === 'folder'
+						? `Everything inside "${folders[deleteCandidate.itemId]?.name ?? 'this folder'}" will be removed.`
+						: `"${bookmarks[deleteCandidate.itemId]?.title ?? 'This bookmark'}" will be removed.`}
+					confirmLabel="Delete"
+					destructive
+					onCancel={() => setDeleteCandidate(null)}
+					onConfirm={() => {
+						if (deleteCandidate.itemType === 'folder') {
+							deleteFolder(deleteCandidate.itemId);
+							showStatus('Folder deleted');
+						} else {
+							deleteBookmark(deleteCandidate.itemId);
+							showStatus('Bookmark deleted');
+						}
+
+						setDeleteCandidate(null);
+						focusItem(deleteCandidate.nextFocusId, true);
+					}}
 				/>
 			) : null}
 		</div>

@@ -31,7 +31,7 @@ chrome.commands.onCommand.addListener((command) => {
     void chrome.tabs.query({ active: true, lastFocusedWindow: true }).then(async ([activeTab]) => {
       await openSidePanel(activeTab);
       await new Promise((resolve) => setTimeout(resolve, 120));
-      await chrome.runtime.sendMessage({ type: 'focus-search' }).catch(() => undefined);
+      await chrome.runtime.sendMessage({ type: 'FOCUS_SEARCH' }).catch(() => undefined);
     });
   }
 });

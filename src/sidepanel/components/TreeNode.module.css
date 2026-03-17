@@ -7,36 +7,43 @@
 .rowShell {
 	position: relative;
 	transform-origin: center center;
+	transition: transform var(--transition-fast), box-shadow var(--transition-normal), opacity var(--transition-fast);
 }
 
 .rowDragging {
-	opacity: 0.38;
+	box-shadow: var(--shadow-md);
+	opacity: 0.92;
+	transform: scale(1.02);
 }
 
 .rowInside {
-	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-blue) 52%, transparent);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-current) 52%, transparent);
 	border-radius: var(--radius-md);
-	background: color-mix(in srgb, var(--accent-blue) 8%, transparent);
+	background: color-mix(in srgb, var(--accent-current) 8%, transparent);
 }
 
 .rowBefore::before,
 .rowAfter::after {
-	background: var(--accent-blue);
+	background: var(--accent-current);
 	border-radius: 999px;
 	content: '';
 	height: 2px;
 	left: 8px;
+	opacity: 0;
 	position: absolute;
 	right: 8px;
+	transition: opacity var(--transition-fast), transform var(--transition-fast);
 	z-index: 2;
 }
 
 .rowBefore::before {
 	top: -1px;
+	opacity: 1;
 }
 
 .rowAfter::after {
 	bottom: -1px;
+	opacity: 1;
 }
 
 .rowInvalid {
@@ -47,4 +54,18 @@
 .rowInvalid.rowBefore::before,
 .rowInvalid.rowAfter::after {
 	background: var(--accent-red);
+}
+
+.children {
+	display: grid;
+	grid-template-rows: 0fr;
+	transition: grid-template-rows var(--transition-normal), opacity var(--transition-normal);
+}
+
+.childrenExpanded {
+	grid-template-rows: 1fr;
+}
+
+.childrenInner {
+	overflow: hidden;
 }

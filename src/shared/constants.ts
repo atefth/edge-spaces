@@ -1,4 +1,5 @@
 export const STORAGE_KEY = 'edgespaces_data';
+export const PREFS_STORAGE_KEY = 'edgespaces_prefs';
 export const STORAGE_VERSION = 1;
 export const MAX_FOLDER_DEPTH = 5;
 export const MAX_PINNED_SITES = 12;

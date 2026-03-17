@@ -42,7 +42,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
 
 	useEffect(() => {
 		function handleFocusMessage(message: unknown) {
-			if (!message || typeof message !== 'object' || (message as { type?: string }).type !== 'focus-search') {
+			if (!message || typeof message !== 'object' || (message as { type?: string }).type !== 'FOCUS_SEARCH') {
 				return;
 			}
 
@@ -75,6 +75,8 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
 				<input
 					ref={inputRef}
 					type="search"
+					role="searchbox"
+					aria-label="Search bookmarks"
 					className={styles.input}
 					placeholder="Search bookmarks..."
 					value={draftQuery}

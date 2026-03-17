@@ -12,15 +12,18 @@ import type {
 	AppState,
 	Bookmark,
 	Folder,
+	PreferencesData,
 	PinnedSite,
 	Space,
 	SpaceColor,
 	StorageData,
+	ThemePreference,
 	TreeItemType,
 } from './types';
 
 interface AppActions {
 	hydrate(): Promise<void>;
+	setTheme(theme: ThemePreference): void;
 	setActiveSpace(spaceId: string): void;
 	addSpace(name: string, color: SpaceColor): void;
 	renameSpace(spaceId: string, name: string): void;
@@ -49,6 +52,7 @@ const initialState: AppState = {
 	bookmarks: {},
 	activeSpaceId: '',
 	searchQuery: '',
+	theme: 'auto',
 	version: STORAGE_VERSION,
 };
 
@@ -98,6 +102,12 @@ function extractStorageData(state: AppState): StorageData {
 		bookmarks: state.bookmarks,
 		activeSpaceId: state.activeSpaceId,
 		version: state.version,
+	};
+}
+
+function extractPreferences(state: AppState): PreferencesData {
+	return {
+		theme: state.theme,
 	};
 }
 
@@ -242,7 +252,7 @@ function isDescendantFolder(folderId: string, possibleAncestorId: string, folder
 	return false;
 }
 
-function normalizeStorageData(data: StorageData): AppState {
+function normalizeStorageData(data: StorageData): Omit<AppState, 'theme'> {
 	const hasActiveSpace = data.spaces.some((space) => space.id === data.activeSpaceId);
 
 	return {
@@ -259,22 +269,42 @@ const persistState = debounce((state: AppState) => {
 	void storageService.save(extractStorageData(state));
 }, PERSIST_DEBOUNCE_MS);
 
+const persistPrefs = debounce((state: AppState) => {
+	void storageService.savePrefs(extractPreferences(state));
+}, PERSIST_DEBOUNCE_MS);
+
 function persistFromStore(): void {
 	persistState(useAppStore.getState());
+}
+
+function persistPrefsFromStore(): void {
+	persistPrefs(useAppStore.getState());
 }
 
 export const useAppStore = create<AppStore>((set, get) => ({
 	...initialState,
 
 	async hydrate() {
-		const loadedState = await storageService.load();
+		const [loadedState, loadedPrefs] = await Promise.all([storageService.load(), storageService.loadPrefs()]);
 		const nextState = normalizeStorageData(loadedState ?? storageService.getDefaultState());
 
-		set(nextState);
+		set({
+			...nextState,
+			theme: loadedPrefs?.theme ?? storageService.getDefaultPrefs().theme,
+		});
 
 		if (!loadedState) {
 			persistFromStore();
 		}
+
+		if (!loadedPrefs) {
+			persistPrefsFromStore();
+		}
+	},
+
+	setTheme(theme) {
+		set({ theme });
+		persistPrefsFromStore();
 	},
 
 	setActiveSpace(spaceId) {

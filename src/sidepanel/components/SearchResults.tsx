@@ -185,6 +185,7 @@ export const SearchResults = forwardRef<SearchResultsHandle, SearchResultsProps>
 									resultRefs.current[itemIndex] = node;
 								}}
 								className={styles.resultButton}
+								style={{ '--search-result-index': Math.min(itemIndex, 9) } as React.CSSProperties}
 								role="option"
 								onClick={() => {
 									if (result.item.type === 'folder') {

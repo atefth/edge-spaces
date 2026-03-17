@@ -37,7 +37,9 @@
 	grid-template-columns: 18px minmax(0, 1fr);
 	padding: 8px 10px;
 	text-align: left;
-	transition: background-color 140ms ease, transform 140ms ease;
+	animation: result-enter var(--transition-normal) both;
+	animation-delay: calc(var(--search-result-index, 0) * 50ms);
+	transition: background-color var(--transition-fast), transform var(--transition-fast);
 	width: 100%;
 }
 
@@ -104,7 +106,7 @@
 }
 
 .highlight {
-	background: color-mix(in srgb, var(--accent-blue) 18%, transparent);
+	background: color-mix(in srgb, var(--accent-current) 18%, transparent);
 	border-radius: 4px;
 	font-weight: 700;
 	padding: 0 1px;
@@ -120,4 +122,16 @@
 	min-height: 180px;
 	padding: var(--spacing-xl);
 	text-align: center;
+}
+
+@keyframes result-enter {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }

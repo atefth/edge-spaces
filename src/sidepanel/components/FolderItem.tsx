@@ -118,7 +118,7 @@ export function FolderItem({
 		if (!folder.expanded) {
 			toggleFolder(folder.id);
 		}
-		onShowStatus('Current tab added');
+		onShowStatus(`Bookmark added to ${folder.name}`);
 	}
 
 	function handleDelete() {

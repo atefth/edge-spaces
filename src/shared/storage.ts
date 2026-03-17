@@ -1,5 +1,5 @@
-import { STORAGE_KEY, STORAGE_VERSION } from './constants';
-import type { Space, StorageData } from './types';
+import { PREFS_STORAGE_KEY, STORAGE_KEY, STORAGE_VERSION } from './constants';
+import type { PreferencesData, Space, StorageData } from './types';
 
 function createId(): string {
 	if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -35,6 +35,16 @@ function isStorageData(value: unknown): value is StorageData {
 	);
 }
 
+function isPreferencesData(value: unknown): value is PreferencesData {
+	if (!value || typeof value !== 'object') {
+		return false;
+	}
+
+	const candidate = value as Partial<PreferencesData>;
+
+	return candidate.theme === 'auto' || candidate.theme === 'light' || candidate.theme === 'dark';
+}
+
 class StorageService {
 	private static instance: StorageService | null = null;
 
@@ -67,6 +77,35 @@ class StorageService {
 		}
 
 		await storageArea.set({ [STORAGE_KEY]: data });
+	}
+
+	async loadPrefs(): Promise<PreferencesData | null> {
+		const storageArea = getStorageArea();
+
+		if (!storageArea) {
+			return null;
+		}
+
+		const result = await storageArea.get(PREFS_STORAGE_KEY);
+		const storedValue = result[PREFS_STORAGE_KEY] as unknown;
+
+		return isPreferencesData(storedValue) ? storedValue : null;
+	}
+
+	async savePrefs(prefs: PreferencesData): Promise<void> {
+		const storageArea = getStorageArea();
+
+		if (!storageArea) {
+			return;
+		}
+
+		await storageArea.set({ [PREFS_STORAGE_KEY]: prefs });
+	}
+
+	getDefaultPrefs(): PreferencesData {
+		return {
+			theme: 'auto',
+		};
 	}
 
 	getDefaultState(): StorageData {

@@ -1,5 +1,7 @@
 export type SpaceColor = 'green' | 'blue' | 'purple' | 'orange' | 'red' | 'pink' | 'gray';
 
+export type ThemePreference = 'auto' | 'light' | 'dark';
+
 export type TreeItemType = 'folder' | 'bookmark';
 
 export interface PinnedSite {
@@ -48,6 +50,7 @@ export interface AppState {
 	bookmarks: Record<string, Bookmark>;
 	activeSpaceId: string;
 	searchQuery: string;
+	theme: ThemePreference;
 	version: number;
 }
 
@@ -57,4 +60,8 @@ export interface StorageData {
 	bookmarks: Record<string, Bookmark>;
 	activeSpaceId: string;
 	version: number;
+}
+
+export interface PreferencesData {
+	theme: ThemePreference;
 }

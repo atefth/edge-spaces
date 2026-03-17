@@ -1,6 +1,6 @@
 .menu,
 .submenu {
-	background: rgb(245 245 240 / 0.98);
+	background: color-mix(in srgb, var(--bg-primary) 96%, transparent);
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-md);
 	box-shadow: var(--shadow-menu);
@@ -9,6 +9,7 @@
 	min-width: 200px;
 	padding: 6px;
 	position: fixed;
+	animation: menu-enter var(--transition-fast);
 	z-index: 40;
 }
 
@@ -29,7 +30,7 @@
 	min-height: 32px;
 	padding: 7px 10px;
 	text-align: left;
-	transition: background-color 140ms ease, color 140ms ease;
+	transition: background-color var(--transition-fast), color var(--transition-fast);
 	width: 100%;
 }
 
@@ -105,4 +106,16 @@
 .submenuLeft {
 	left: auto;
 	right: calc(100% + 6px);
+}
+
+@keyframes menu-enter {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
