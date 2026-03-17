@@ -79,6 +79,20 @@
 		0 8px 18px rgb(34 37 31 / 0.08);
 }
 
+.tabDropTarget {
+	box-shadow:
+		inset 0 0 0 2px color-mix(in srgb, var(--accent-blue) 48%, transparent),
+		0 10px 20px color-mix(in srgb, var(--accent-blue) 10%, transparent);
+		background: color-mix(in srgb, var(--accent-blue) 8%, rgb(255 255 255 / 0.3));
+}
+
+.tabInvalidDrop {
+	box-shadow:
+		inset 0 0 0 2px color-mix(in srgb, var(--accent-red) 48%, transparent),
+		0 10px 20px color-mix(in srgb, var(--accent-red) 8%, transparent);
+		background: color-mix(in srgb, var(--accent-red) 6%, rgb(255 255 255 / 0.3));
+}
+
 .tabLabel {
 	display: block;
 	overflow: hidden;

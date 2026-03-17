@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { type CSSProperties, type HTMLAttributes, type Ref, useEffect, useRef, useState } from 'react';
 
 import { MAX_FOLDER_DEPTH } from '../../shared/constants';
 import { useAppStore } from '../../shared/store';
@@ -11,6 +11,10 @@ interface FolderItemProps {
 	folderId: string;
 	depth: number;
 	isEditing: boolean;
+	rowAttributes?: HTMLAttributes<HTMLDivElement> & Record<string, unknown>;
+	rowClassName?: string;
+	rowRef?: Ref<HTMLDivElement>;
+	rowStyle?: CSSProperties;
 	onStartFolderRename: (itemId: string) => void;
 	onStartBookmarkRename: (itemId: string) => void;
 	onStartBookmarkForm: (itemId: string) => void;
@@ -35,6 +39,10 @@ export function FolderItem({
 	folderId,
 	depth,
 	isEditing,
+	rowAttributes,
+	rowClassName,
+	rowRef,
+	rowStyle,
 	onStartFolderRename,
 	onStartBookmarkRename,
 	onStartBookmarkForm,
@@ -151,9 +159,17 @@ export function FolderItem({
 	return (
 		<>
 			<div
-				className={styles.row}
-				style={{ '--node-depth': depth } as React.CSSProperties}
+				ref={rowRef}
+				className={`${styles.row} ${rowClassName ?? ''}`.trim()}
+				style={{ ...rowStyle, '--node-depth': depth } as CSSProperties}
+				{...rowAttributes}
 				onContextMenu={(event) => {
+					rowAttributes?.onContextMenu?.(event);
+
+					if (event.defaultPrevented) {
+						return;
+					}
+
 					event.preventDefault();
 					openMenu(event.clientX, event.clientY);
 				}}

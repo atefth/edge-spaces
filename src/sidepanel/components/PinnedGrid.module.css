@@ -2,6 +2,19 @@
 	position: relative;
 }
 
+.srOnly {
+	border: 0;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
 .grid {
 	display: grid;
 	gap: var(--spacing-sm);
@@ -14,6 +27,10 @@
 .addCell {
 	position: relative;
 	width: 48px;
+}
+
+.siteCellDragging {
+	z-index: 12;
 }
 
 .addCellEmpty {
@@ -54,6 +71,10 @@
 	box-shadow:
 		0 0 0 2px color-mix(in srgb, var(--accent-blue) 24%, transparent),
 		0 10px 20px rgb(32 37 28 / 0.08);
+}
+
+.siteButtonDragging {
+	opacity: 0.38;
 }
 
 .siteInner {
@@ -187,6 +208,13 @@
 	padding: var(--spacing-xs);
 	position: fixed;
 	z-index: 30;
+}
+
+.overlay {
+	border-radius: 14px;
+	box-shadow: 0 16px 30px rgb(27 31 24 / 0.16);
+	opacity: 0.94;
+	transform: rotate(-2deg);
 }
 
 .menuItem {

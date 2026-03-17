@@ -1,9 +1,22 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+	DndContext,
+	DragOverlay,
+	type DragEndEvent,
+	type DragStartEvent,
+	KeyboardSensor,
+	PointerSensor,
+	closestCenter,
+	useSensor,
+	useSensors,
+} from '@dnd-kit/core';
+import { SortableContext, arrayMove, rectSortingStrategy, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
+import { type ButtonHTMLAttributes, type CSSProperties, type Ref, useEffect, useMemo, useRef, useState } from 'react';
 
 import { MAX_PINNED_SITES } from '../../shared/constants';
 import { getFaviconUrl } from '../../shared/favicon';
 import { useAppStore } from '../../shared/store';
 import type { PinnedSite } from '../../shared/types';
+import { toRowTransform } from './TreeDndProvider';
 import styles from './PinnedGrid.module.css';
 
 interface PinnedGridProps {
@@ -19,6 +32,11 @@ interface ContextMenuState {
 
 interface PinnedIconProps {
 	site: PinnedSite;
+	buttonAttributes?: ButtonHTMLAttributes<HTMLButtonElement>;
+	buttonRef?: Ref<HTMLButtonElement>;
+	buttonStyle?: CSSProperties;
+	instructionId?: string;
+	isDragging?: boolean;
 	onOpen: (openInNewTab: boolean) => void;
 	onContextMenu: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
@@ -34,7 +52,16 @@ function GlobeIcon() {
 	);
 }
 
-function PinnedIcon({ site, onOpen, onContextMenu }: PinnedIconProps) {
+function PinnedIcon({
+	site,
+	buttonAttributes,
+	buttonRef,
+	buttonStyle,
+	instructionId,
+	isDragging = false,
+	onOpen,
+	onContextMenu,
+}: PinnedIconProps) {
 	const [hasImageError, setHasImageError] = useState(false);
 	const [isTooltipVisible, setIsTooltipVisible] = useState(false);
 
@@ -49,9 +76,13 @@ function PinnedIcon({ site, onOpen, onContextMenu }: PinnedIconProps) {
 			onMouseLeave={() => setIsTooltipVisible(false)}
 		>
 			<button
+				ref={buttonRef}
 				type="button"
-				className={styles.siteButton}
+				className={`${styles.siteButton} ${isDragging ? styles.siteButtonDragging : ''}`}
 				aria-label={site.title}
+				aria-describedby={instructionId}
+				style={buttonStyle}
+				{...buttonAttributes}
 				onBlur={() => setIsTooltipVisible(false)}
 				onFocus={() => setIsTooltipVisible(true)}
 				onClick={(event) => {
@@ -91,22 +122,70 @@ function PinnedIcon({ site, onOpen, onContextMenu }: PinnedIconProps) {
 			</div>
 		</div>
 	);
+	}
+
+interface SortablePinnedIconProps {
+	site: PinnedSite;
+	instructionId: string;
+	onOpen: (openInNewTab: boolean) => void;
+	onContextMenu: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+function SortablePinnedIcon({ site, instructionId, onOpen, onContextMenu }: SortablePinnedIconProps) {
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+		id: site.id,
+		data: {
+			siteId: site.id,
+		},
+	});
+
+	return (
+		<div className={`${styles.siteCell} ${isDragging ? styles.siteCellDragging : ''}`}>
+			<PinnedIcon
+				site={site}
+				buttonAttributes={{ ...attributes, ...listeners }}
+				buttonRef={setNodeRef}
+				buttonStyle={{
+					transform: toRowTransform(transform),
+					transition,
+					zIndex: isDragging ? 12 : undefined,
+				}}
+				instructionId={instructionId}
+				isDragging={isDragging}
+				onOpen={onOpen}
+				onContextMenu={onContextMenu}
+			/>
+		</div>
+	);
 }
 
 export function PinnedGrid({ activeSpaceId, pinnedSites }: PinnedGridProps) {
 	const addPinnedSite = useAppStore((state) => state.addPinnedSite);
 	const removePinnedSite = useAppStore((state) => state.removePinnedSite);
+	const reorderPinnedSites = useAppStore((state) => state.reorderPinnedSites);
 	const menuRef = useRef<HTMLDivElement>(null);
 	const timeoutRef = useRef<number | null>(null);
 	const [statusMessage, setStatusMessage] = useState<string | null>(null);
 	const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 	const [isAddTooltipVisible, setIsAddTooltipVisible] = useState(false);
+	const [activeDraggedSiteId, setActiveDraggedSiteId] = useState<string | null>(null);
+	const [liveMessage, setLiveMessage] = useState('');
 
 	const sortedSites = useMemo(
 		() => [...pinnedSites].sort((left, right) => left.position - right.position),
 		[pinnedSites],
 	);
 	const canAddMore = sortedSites.length < MAX_PINNED_SITES;
+	const sensors = useSensors(
+		useSensor(PointerSensor, {
+			activationConstraint: {
+				distance: 8,
+			},
+		}),
+		useSensor(KeyboardSensor, {
+			coordinateGetter: sortableKeyboardCoordinates,
+		}),
+	);
 
 	useEffect(() => {
 		return () => {
@@ -212,45 +291,103 @@ export function PinnedGrid({ activeSpaceId, pinnedSites }: PinnedGridProps) {
 		showStatus('Pinned current tab');
 	}
 
+	function handleDragStart(event: DragStartEvent) {
+		setActiveDraggedSiteId(String(event.active.id));
+		const site = sortedSites.find((candidate) => candidate.id === event.active.id);
+		setLiveMessage(site ? `Picked up ${site.title}.` : 'Pinned site picked up.');
+	}
+
+	function handleDragEnd(event: DragEndEvent) {
+		const { active, over } = event;
+		setActiveDraggedSiteId(null);
+
+		if (!over || active.id === over.id) {
+			return;
+		}
+
+		const oldIndex = sortedSites.findIndex((site) => site.id === active.id);
+		const newIndex = sortedSites.findIndex((site) => site.id === over.id);
+
+		if (oldIndex === -1 || newIndex === -1) {
+			return;
+		}
+
+		const nextOrder = arrayMove(sortedSites, oldIndex, newIndex).map((site) => site.id);
+		reorderPinnedSites(activeSpaceId, nextOrder);
+
+		const site = sortedSites[oldIndex];
+		setLiveMessage(site ? `Moved ${site.title}.` : 'Pinned site moved.');
+	}
+
+	const activeDraggedSite = activeDraggedSiteId ? sortedSites.find((site) => site.id === activeDraggedSiteId) ?? null : null;
+
 	return (
 		<div className={styles.panel}>
-			<div className={styles.grid}>
-				{sortedSites.map((site) => (
-					<PinnedIcon
-						key={site.id}
-						site={site}
-						onOpen={(openInNewTab) => {
-							void openSite(site.url, openInNewTab);
-						}}
-						onContextMenu={(event) => openContextMenu(event, site)}
-					/>
-				))}
-
-				{canAddMore ? (
-					<div
-						className={`${styles.addCell} ${sortedSites.length === 0 ? styles.addCellEmpty : ''}`}
-						onMouseEnter={() => setIsAddTooltipVisible(true)}
-						onMouseLeave={() => setIsAddTooltipVisible(false)}
-					>
-						<button
-							type="button"
-							className={`${styles.addButton} ${sortedSites.length === 0 ? styles.addButtonEmpty : ''}`}
-							onBlur={() => setIsAddTooltipVisible(false)}
-							onClick={() => {
-								void pinCurrentTab();
-							}}
-							onFocus={() => setIsAddTooltipVisible(true)}
-							aria-label="Pin the current tab"
-						>
-							<span className={styles.addGlyph}>+</span>
-							{sortedSites.length === 0 ? <span className={styles.addLabel}>Pin a site</span> : null}
-						</button>
-						<div className={`${styles.tooltip} ${isAddTooltipVisible ? styles.tooltipVisible : ''}`} role="tooltip">
-							Pin current tab
-						</div>
-					</div>
-				) : null}
+			<div id="pinned-grid-dnd-instructions" className={styles.srOnly}>
+				Press space to pick up a pinned site, use arrow keys to move it, and press space again to drop it.
 			</div>
+			<div className={styles.srOnly} aria-live="polite" aria-atomic="true">
+				{liveMessage}
+			</div>
+			<DndContext
+				sensors={sensors}
+				collisionDetection={closestCenter}
+				onDragStart={handleDragStart}
+				onDragEnd={handleDragEnd}
+				onDragCancel={() => setActiveDraggedSiteId(null)}
+			>
+				<SortableContext items={sortedSites.map((site) => site.id)} strategy={rectSortingStrategy}>
+					<div className={styles.grid}>
+						{sortedSites.map((site) => (
+							<SortablePinnedIcon
+								key={site.id}
+								site={site}
+								instructionId="pinned-grid-dnd-instructions"
+								onOpen={(openInNewTab) => {
+									void openSite(site.url, openInNewTab);
+								}}
+								onContextMenu={(event) => openContextMenu(event, site)}
+							/>
+						))}
+
+						{canAddMore ? (
+							<div
+								className={`${styles.addCell} ${sortedSites.length === 0 ? styles.addCellEmpty : ''}`}
+								onMouseEnter={() => setIsAddTooltipVisible(true)}
+								onMouseLeave={() => setIsAddTooltipVisible(false)}
+							>
+								<button
+									type="button"
+									className={`${styles.addButton} ${sortedSites.length === 0 ? styles.addButtonEmpty : ''}`}
+									onBlur={() => setIsAddTooltipVisible(false)}
+									onClick={() => {
+										void pinCurrentTab();
+									}}
+									onFocus={() => setIsAddTooltipVisible(true)}
+									aria-label="Pin the current tab"
+								>
+									<span className={styles.addGlyph}>+</span>
+									{sortedSites.length === 0 ? <span className={styles.addLabel}>Pin a site</span> : null}
+								</button>
+								<div className={`${styles.tooltip} ${isAddTooltipVisible ? styles.tooltipVisible : ''}`} role="tooltip">
+									Pin current tab
+								</div>
+							</div>
+						) : null}
+					</div>
+				</SortableContext>
+				<DragOverlay>
+					{activeDraggedSite ? (
+						<div className={styles.overlay}>
+							<PinnedIcon
+								site={activeDraggedSite}
+								onOpen={() => undefined}
+								onContextMenu={() => undefined}
+							/>
+						</div>
+					) : null}
+				</DragOverlay>
+			</DndContext>
 
 			{statusMessage ? <div className={styles.toast}>{statusMessage}</div> : null}
 

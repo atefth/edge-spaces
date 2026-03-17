@@ -1,9 +1,11 @@
+import { useDroppable } from '@dnd-kit/core';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAppStore } from '../../shared/store';
 import type { Space, SpaceColor } from '../../shared/types';
 import { ConfirmDialog } from './ConfirmDialog';
 import { InlineEdit } from './InlineEdit';
+import { getSpaceTabDndId, useTreeDnd } from './TreeDndProvider';
 import styles from './SpaceBar.module.css';
 
 const SPACE_COLORS: SpaceColor[] = ['green', 'blue', 'purple', 'orange', 'red', 'pink', 'gray'];
@@ -17,6 +19,83 @@ interface ContextMenuState {
 
 function getAccentColor(color: SpaceColor): string {
 	return `var(--accent-${color})`;
+}
+
+interface SpaceTabProps {
+	space: Space;
+	isActive: boolean;
+	isEditing: boolean;
+	registerTabRef: (spaceId: string, node: HTMLDivElement | null) => void;
+	onActivate: (spaceId: string) => void;
+	onOpenContextMenu: (spaceId: string, x: number, y: number) => void;
+	onStartRename: (spaceId: string) => void;
+	onRename: (spaceId: string, nextName: string) => void;
+	onCancelRename: () => void;
+}
+
+function SpaceTab({
+	space,
+	isActive,
+	isEditing,
+	registerTabRef,
+	onActivate,
+	onOpenContextMenu,
+	onStartRename,
+	onRename,
+	onCancelRename,
+}: SpaceTabProps) {
+	const { activeItem, instructionsId, preview } = useTreeDnd();
+	const { setNodeRef } = useDroppable({
+		id: getSpaceTabDndId(space.id),
+		data: {
+			kind: 'space-tab',
+			spaceId: space.id,
+		},
+	});
+	const isDropTarget = Boolean(activeItem) && preview?.kind === 'space-tab' && preview.targetSpaceId === space.id;
+	const isInvalidDrop = isDropTarget && Boolean(preview?.invalidReason);
+
+	return (
+		<div
+			ref={(node) => {
+				setNodeRef(node);
+				registerTabRef(space.id, node);
+			}}
+			className={`${styles.tabShell} ${isActive ? styles.tabShellActive : ''}`}
+			style={{ '--space-accent': getAccentColor(space.color) } as React.CSSProperties}
+		>
+			<button
+				type="button"
+				role="tab"
+				aria-describedby={activeItem ? instructionsId : undefined}
+				aria-selected={isActive}
+				className={`${styles.tab} ${isActive ? styles.tabActive : ''} ${isDropTarget ? styles.tabDropTarget : ''} ${isInvalidDrop ? styles.tabInvalidDrop : ''}`}
+				onClick={() => onActivate(space.id)}
+				onContextMenu={(event) => {
+					event.preventDefault();
+					onActivate(space.id);
+					onOpenContextMenu(space.id, event.clientX, event.clientY);
+				}}
+				onDoubleClick={() => onStartRename(space.id)}
+			>
+				{isActive ? <span className={styles.activeGlow} aria-hidden="true" /> : null}
+				{isEditing ? (
+					<InlineEdit
+						value={space.name}
+						onCancel={onCancelRename}
+						onSave={(nextName) => {
+							onRename(space.id, nextName);
+						}}
+					/>
+				) : (
+					<>
+						<span className={styles.tabLabel}>{space.name}</span>
+						<span className={styles.tabUnderline} aria-hidden="true" />
+					</>
+				)}
+			</button>
+		</div>
+	);
 }
 
 export function SpaceBar() {
@@ -143,45 +222,23 @@ export function SpaceBar() {
 							const isEditing = space.id === editingSpaceId;
 
 							return (
-								<div
+								<SpaceTab
 									key={space.id}
-									ref={(node) => {
-										tabRefs.current[space.id] = node;
+									space={space}
+									isActive={isActive}
+									isEditing={isEditing}
+									registerTabRef={(spaceId, node) => {
+										tabRefs.current[spaceId] = node;
 									}}
-									className={`${styles.tabShell} ${isActive ? styles.tabShellActive : ''}`}
-									style={{ '--space-accent': getAccentColor(space.color) } as React.CSSProperties}
-								>
-									<button
-										type="button"
-										role="tab"
-										aria-selected={isActive}
-										className={`${styles.tab} ${isActive ? styles.tabActive : ''}`}
-										onClick={() => setActiveSpace(space.id)}
-										onContextMenu={(event) => {
-											event.preventDefault();
-											setActiveSpace(space.id);
-											openContextMenu(space.id, event.clientX, event.clientY);
-										}}
-										onDoubleClick={() => setEditingSpaceId(space.id)}
-									>
-										{isActive ? <span className={styles.activeGlow} aria-hidden="true" /> : null}
-										{isEditing ? (
-											<InlineEdit
-												value={space.name}
-												onCancel={() => setEditingSpaceId(null)}
-												onSave={(nextName) => {
-													renameSpace(space.id, nextName);
-													setEditingSpaceId(null);
-												}}
-											/>
-										) : (
-											<>
-												<span className={styles.tabLabel}>{space.name}</span>
-												<span className={styles.tabUnderline} aria-hidden="true" />
-											</>
-										)}
-									</button>
-								</div>
+									onActivate={setActiveSpace}
+									onOpenContextMenu={openContextMenu}
+									onStartRename={setEditingSpaceId}
+									onRename={(spaceId, nextName) => {
+										renameSpace(spaceId, nextName);
+										setEditingSpaceId(null);
+									}}
+									onCancelRename={() => setEditingSpaceId(null)}
+								/>
 							);
 						})}
 					</div>

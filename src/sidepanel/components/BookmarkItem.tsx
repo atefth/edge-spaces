@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { type CSSProperties, type HTMLAttributes, type Ref, useEffect, useRef, useState } from 'react';
 
 import { getFaviconUrl } from '../../shared/favicon';
 import { useAppStore } from '../../shared/store';
@@ -11,6 +11,10 @@ interface BookmarkItemProps {
 	depth: number;
 	isRenaming: boolean;
 	isEditingForm: boolean;
+	rowAttributes?: HTMLAttributes<HTMLDivElement> & Record<string, unknown>;
+	rowClassName?: string;
+	rowRef?: Ref<HTMLDivElement>;
+	rowStyle?: CSSProperties;
 	onStartBookmarkRename: (itemId: string) => void;
 	onStartBookmarkForm: (itemId: string) => void;
 	onClearEditing: () => void;
@@ -46,6 +50,10 @@ export function BookmarkItem({
 	depth,
 	isRenaming,
 	isEditingForm,
+	rowAttributes,
+	rowClassName,
+	rowRef,
+	rowStyle,
 	onStartBookmarkRename,
 	onStartBookmarkForm,
 	onClearEditing,
@@ -181,9 +189,17 @@ export function BookmarkItem({
 			) : null}
 
 			<div
-				className={styles.row}
-				style={{ '--node-depth': depth } as React.CSSProperties}
+				ref={rowRef}
+				style={{ ...rowStyle, '--node-depth': depth } as CSSProperties}
+				{...rowAttributes}
+				className={`${styles.row} ${rowClassName ?? ''}`.trim()}
 				onContextMenu={(event) => {
+					rowAttributes?.onContextMenu?.(event);
+
+					if (event.defaultPrevented) {
+						return;
+					}
+
 					event.preventDefault();
 					setContextMenuPosition({ x: event.clientX, y: event.clientY });
 				}}

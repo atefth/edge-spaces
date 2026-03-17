@@ -1,0 +1,85 @@
+.srOnly {
+	border: 0;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+.overlay {
+	align-items: center;
+	backdrop-filter: blur(18px);
+	background: rgb(245 245 240 / 0.92);
+	border: 1px solid rgb(74 127 181 / 0.28);
+	border-radius: 12px;
+	box-shadow: 0 18px 32px rgb(27 31 24 / 0.16);
+	display: grid;
+	gap: 8px;
+	grid-template-columns: 18px minmax(0, 1fr);
+	max-width: 280px;
+	min-height: 36px;
+	opacity: 0.96;
+	padding: 8px 10px;
+	transform: rotate(-1deg);
+	width: 100%;
+}
+
+.overlayFolderIcon,
+.overlayBookmarkIcon {
+	align-items: center;
+	color: var(--text-secondary);
+	display: inline-flex;
+	height: 18px;
+	justify-content: center;
+	width: 18px;
+}
+
+.overlayFolderIcon {
+	color: var(--accent-orange);
+	fill: currentColor;
+	stroke: none;
+	width: 16px;
+	height: 16px;
+}
+
+.overlayBookmarkIcon {
+	border-radius: 4px;
+	overflow: hidden;
+	width: 16px;
+	height: 16px;
+}
+
+.overlayFallbackIcon {
+	height: 16px;
+	width: 16px;
+}
+
+.overlayLabelBlock {
+	display: grid;
+	gap: 2px;
+	min-width: 0;
+}
+
+.overlayTitle,
+.overlayUrl {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.overlayTitle {
+	font-size: var(--font-size-md);
+	font-weight: 600;
+	line-height: 1.2;
+}
+
+.overlayUrl {
+	color: var(--text-tertiary);
+	font-size: var(--font-size-sm);
+	line-height: 1.2;
+}

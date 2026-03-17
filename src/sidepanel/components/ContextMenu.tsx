@@ -144,7 +144,7 @@ export function ContextMenu({ items, position, onClose }: ContextMenuProps) {
 
 							{isSubmenuOpen ? (
 								<div className={`${styles.submenu} ${measuredPosition.openLeft ? styles.submenuLeft : ''}`}>
-									{item.children.map((child, childIndex) => {
+									{item.children?.map((child, childIndex) => {
 										if (child.separator) {
 											return <div key={`child-separator-${childIndex}`} className={styles.separator} role="separator" />;
 										}

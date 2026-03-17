@@ -130,6 +130,26 @@ function getFolderDepth(folders: Record<string, Folder>, parentId: string | null
 	return depth;
 }
 
+function getFolderSubtreeHeight(folderId: string, folders: Record<string, Folder>): number {
+	const folder = folders[folderId];
+
+	if (!folder) {
+		return 0;
+	}
+
+	let tallestChildHeight = 0;
+
+	for (const childId of folder.childIds) {
+		if (!folders[childId]) {
+			continue;
+		}
+
+		tallestChildHeight = Math.max(tallestChildHeight, getFolderSubtreeHeight(childId, folders));
+	}
+
+	return 1 + tallestChildHeight;
+}
+
 function collectFolderDescendants(folderId: string, folders: Record<string, Folder>, bookmarks: Record<string, Bookmark>): {
 	folderIds: string[];
 	bookmarkIds: string[];
@@ -717,7 +737,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
 				return;
 			}
 
-			if (getFolderDepth(state.folders, newParentId) >= MAX_FOLDER_DEPTH) {
+			if (getFolderDepth(state.folders, newParentId) + getFolderSubtreeHeight(itemId, state.folders) > MAX_FOLDER_DEPTH) {
 				return;
 			}
 		}

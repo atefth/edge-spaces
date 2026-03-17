@@ -55,6 +55,26 @@
 .tree {
 	display: grid;
 	gap: 2px;
+	outline: none;
+}
+
+.rootDropZone {
+	border-radius: 999px;
+	height: 10px;
+	margin-top: 4px;
+	opacity: 0;
+	transition: opacity 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+}
+
+.rootDropZoneActive {
+	background: color-mix(in srgb, var(--accent-blue) 80%, transparent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-blue) 22%, transparent);
+	opacity: 1;
+}
+
+.rootDropZoneInvalid {
+	background: color-mix(in srgb, var(--accent-red) 80%, transparent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-red) 18%, transparent);
 }
 
 .emptyState {
@@ -69,6 +89,18 @@
 	min-height: 180px;
 	padding: var(--spacing-xl);
 	text-align: center;
+}
+
+.emptyStateDropTarget {
+	border-color: color-mix(in srgb, var(--accent-blue) 42%, var(--border-strong));
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-blue) 12%, transparent);
+	background: color-mix(in srgb, var(--accent-blue) 6%, rgb(255 255 255 / 0.22));
+}
+
+.emptyStateDropInvalid {
+	border-color: color-mix(in srgb, var(--accent-red) 42%, var(--border-strong));
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-red) 12%, transparent);
+	background: color-mix(in srgb, var(--accent-red) 6%, rgb(255 255 255 / 0.22));
 }
 
 .emptyTitle {

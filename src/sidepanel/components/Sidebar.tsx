@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useAppStore } from '../../shared/store';
 import { SpaceBar } from './SpaceBar';
 import { SpaceContent } from './SpaceContent';
+import { TreeDndProvider } from './TreeDndProvider';
 import styles from './Sidebar.module.css';
 
 export function Sidebar() {
@@ -30,10 +31,10 @@ export function Sidebar() {
 					<div className={styles.loadingLabel}>Loading spaces...</div>
 				</div>
 			) : (
-				<>
+				<TreeDndProvider>
 					<SpaceBar />
 					<SpaceContent />
-				</>
+				</TreeDndProvider>
 			)}
 		</div>
 	);

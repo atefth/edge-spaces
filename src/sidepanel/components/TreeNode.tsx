@@ -1,7 +1,10 @@
+import { useSortable } from '@dnd-kit/sortable';
+
 import { useAppStore } from '../../shared/store';
 import type { TreeItemType } from '../../shared/types';
 import { BookmarkItem } from './BookmarkItem';
 import { FolderItem } from './FolderItem';
+import { getTreeItemDndId, toRowTransform, useTreeDnd } from './TreeDndProvider';
 import styles from './TreeNode.module.css';
 
 interface EditingState {
@@ -34,6 +37,42 @@ export function TreeNode({
 }: TreeNodeProps) {
 	const folders = useAppStore((state) => state.folders);
 	const bookmarks = useAppStore((state) => state.bookmarks);
+	const { instructionsId, preview } = useTreeDnd();
+	const isEditing = editingState?.itemId === itemId;
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+		id: getTreeItemDndId(itemId),
+		data: {
+			kind: 'tree-item',
+			itemId,
+			itemType,
+		},
+		disabled: isEditing,
+	});
+	const isDropTarget = preview?.overItemId === itemId;
+	const isDropInvalid = isDropTarget && Boolean(preview?.invalidReason);
+	const rowClassName = [
+		styles.rowShell,
+		isDragging ? styles.rowDragging : '',
+		isDropTarget && preview?.mode === 'inside' ? styles.rowInside : '',
+		isDropTarget && preview?.mode === 'before' ? styles.rowBefore : '',
+		isDropTarget && preview?.mode === 'after' ? styles.rowAfter : '',
+		isDropInvalid ? styles.rowInvalid : '',
+	]
+		.filter(Boolean)
+		.join(' ');
+	const rowStyle = {
+		transform: toRowTransform(transform),
+		transition,
+		zIndex: isDragging ? 25 : undefined,
+	} as React.CSSProperties;
+	const rowAttributes = {
+		...attributes,
+		...listeners,
+		'aria-describedby': instructionsId,
+		'aria-label': itemType === 'folder' ? 'Draggable folder row' : 'Draggable bookmark row',
+		'aria-roledescription': 'sortable item',
+		'data-tree-item-id': itemId,
+	};
 
 	if (itemType === 'folder') {
 		const folder = folders[itemId];
@@ -48,6 +87,10 @@ export function TreeNode({
 					folderId={folder.id}
 					depth={depth}
 					isEditing={editingState?.itemId === folder.id && editingState.mode === 'folder-name'}
+					rowAttributes={{ ...rowAttributes, 'data-folder-id': folder.id }}
+					rowClassName={rowClassName}
+					rowRef={setNodeRef}
+					rowStyle={rowStyle}
 					onClearEditing={onClearEditing}
 					onShowStatus={onShowStatus}
 					onStartBookmarkForm={onStartBookmarkForm}
@@ -101,6 +144,10 @@ export function TreeNode({
 			depth={depth}
 			isEditingForm={editingState?.itemId === bookmark.id && editingState.mode === 'bookmark-form'}
 			isRenaming={editingState?.itemId === bookmark.id && editingState.mode === 'bookmark-name'}
+			rowAttributes={rowAttributes}
+			rowClassName={rowClassName}
+			rowRef={setNodeRef}
+			rowStyle={rowStyle}
 			onClearEditing={onClearEditing}
 			onShowStatus={onShowStatus}
 			onStartBookmarkForm={onStartBookmarkForm}

@@ -1,7 +1,10 @@
+import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAppStore } from '../../shared/store';
 import { ContextMenu, type ContextMenuItem } from './ContextMenu';
+import { getSpaceRootDndId, getTreeItemDndId, useTreeDnd } from './TreeDndProvider';
 import { TreeNode } from './TreeNode';
 import styles from './FolderTree.module.css';
 
@@ -69,12 +72,33 @@ function flattenFolderChoices(
 	});
 }
 
+function flattenVisibleTreeIds(
+	itemIds: string[],
+	folders: ReturnType<typeof useAppStore.getState>['folders'],
+	bookmarks: ReturnType<typeof useAppStore.getState>['bookmarks'],
+): string[] {
+	return itemIds.flatMap((itemId) => {
+		if (folders[itemId]) {
+			const folder = folders[itemId];
+			return [getTreeItemDndId(folder.id), ...(folder.expanded ? flattenVisibleTreeIds(folder.childIds, folders, bookmarks) : [])];
+		}
+
+		if (bookmarks[itemId]) {
+			return [getTreeItemDndId(itemId)];
+		}
+
+		return [];
+	});
+}
+
 export function FolderTree() {
 	const spaces = useAppStore((state) => state.spaces);
 	const folders = useAppStore((state) => state.folders);
+	const bookmarks = useAppStore((state) => state.bookmarks);
 	const activeSpaceId = useAppStore((state) => state.activeSpaceId);
 	const addFolder = useAppStore((state) => state.addFolder);
 	const addBookmark = useAppStore((state) => state.addBookmark);
+	const { activeItem, preview } = useTreeDnd();
 	const activeSpace = spaces.find((space) => space.id === activeSpaceId) ?? null;
 	const toastTimeoutRef = useRef<number | null>(null);
 	const [editingState, setEditingState] = useState<EditingState>(null);
@@ -85,6 +109,17 @@ export function FolderTree() {
 		() => (activeSpace ? flattenFolderChoices(activeSpace.rootFolderIds, folders) : []),
 		[activeSpace, folders],
 	);
+	const visibleTreeIds = useMemo(
+		() => (activeSpace ? flattenVisibleTreeIds(activeSpace.rootFolderIds, folders, bookmarks) : []),
+		[activeSpace, bookmarks, folders],
+	);
+	const { setNodeRef: setRootDropRef, isOver: isRootDropHovered } = useDroppable({
+		id: getSpaceRootDndId(activeSpaceId),
+		data: {
+			kind: 'space-root',
+			spaceId: activeSpaceId,
+		},
+	});
 
 	useEffect(() => {
 		return () => {
@@ -193,6 +228,9 @@ export function FolderTree() {
 		return null;
 	}
 
+	const isRootDropTarget = Boolean(activeItem) && preview?.mode === 'root' && preview.targetSpaceId === activeSpaceId;
+	const isRootDropInvalid = isRootDropTarget && Boolean(preview?.invalidReason);
+
 	return (
 		<div className={styles.panel}>
 			<div className={styles.toolbar}>
@@ -211,7 +249,12 @@ export function FolderTree() {
 			</div>
 
 			{activeSpace.rootFolderIds.length === 0 ? (
-				<div className={styles.emptyState}>
+				<div
+					ref={setRootDropRef}
+					className={`${styles.emptyState} ${isRootDropTarget ? styles.emptyStateDropTarget : ''} ${isRootDropInvalid ? styles.emptyStateDropInvalid : ''}`}
+					tabIndex={-1}
+					data-tree-root="true"
+				>
 					<div className={styles.emptyTitle}>No bookmarks yet</div>
 					<p className={styles.emptyMessage}>Create a folder to start building this space.</p>
 					<button type="button" className={styles.emptyAction} onClick={createRootFolder}>
@@ -219,22 +262,29 @@ export function FolderTree() {
 					</button>
 				</div>
 			) : (
-				<div className={styles.tree}>
-					{activeSpace.rootFolderIds.map((folderId) => (
-						<TreeNode
-							key={folderId}
-							itemId={folderId}
-							itemType="folder"
-							depth={0}
-							editingState={editingState}
-							onClearEditing={() => setEditingState(null)}
-							onShowStatus={showStatus}
-							onStartBookmarkForm={(itemId) => setEditingState({ itemId, mode: 'bookmark-form' })}
-							onStartFolderRename={(itemId) => setEditingState({ itemId, mode: 'folder-name' })}
-							onStartBookmarkRename={(itemId) => setEditingState({ itemId, mode: 'bookmark-name' })}
+				<SortableContext items={visibleTreeIds} strategy={verticalListSortingStrategy}>
+					<div className={styles.tree} tabIndex={-1} data-tree-root="true">
+						{activeSpace.rootFolderIds.map((folderId) => (
+							<TreeNode
+								key={folderId}
+								itemId={folderId}
+								itemType="folder"
+								depth={0}
+								editingState={editingState}
+								onClearEditing={() => setEditingState(null)}
+								onShowStatus={showStatus}
+								onStartBookmarkForm={(itemId) => setEditingState({ itemId, mode: 'bookmark-form' })}
+								onStartFolderRename={(itemId) => setEditingState({ itemId, mode: 'folder-name' })}
+								onStartBookmarkRename={(itemId) => setEditingState({ itemId, mode: 'bookmark-name' })}
+							/>
+						))}
+						<div
+							ref={setRootDropRef}
+							className={`${styles.rootDropZone} ${isRootDropTarget || isRootDropHovered ? styles.rootDropZoneActive : ''} ${isRootDropInvalid ? styles.rootDropZoneInvalid : ''}`}
+							aria-hidden="true"
 						/>
-					))}
-				</div>
+					</div>
+				</SortableContext>
 			)}
 
 			{statusMessage ? <div className={styles.toast}>{statusMessage}</div> : null}
