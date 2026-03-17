@@ -83,6 +83,10 @@ function isValidHttpUrl(url: string): boolean {
 	}
 }
 
+function isValidBookmarkUrlDraft(url: string): boolean {
+	return /^https?:\/\//i.test(url.trim());
+}
+
 function normalizeName(name: string): string {
 	return name.trim();
 }
@@ -587,7 +591,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
 	addBookmark(spaceId, parentId, title, url) {
 		const trimmedTitle = normalizeName(title) || 'New Bookmark';
 
-		if (!isValidHttpUrl(url)) {
+		if (!isValidBookmarkUrlDraft(url)) {
 			return;
 		}
 
@@ -634,7 +638,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
 			return;
 		}
 
-		if (updates.url !== undefined && !isValidHttpUrl(updates.url)) {
+		if (updates.url !== undefined && !isValidBookmarkUrlDraft(updates.url)) {
 			return;
 		}
 

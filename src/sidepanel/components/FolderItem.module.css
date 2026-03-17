@@ -1,0 +1,107 @@
+.row {
+	align-items: center;
+	border-radius: var(--radius-md);
+	display: grid;
+	gap: 6px;
+	grid-template-columns: 18px minmax(0, 1fr) 24px;
+	min-height: 28px;
+	padding: 2px 6px 2px calc((var(--node-depth) * var(--tree-indent)) + 4px);
+	position: relative;
+	transition: background-color 140ms ease;
+}
+
+.row:hover {
+	background: var(--bg-hover);
+}
+
+.chevronButton,
+.labelButton,
+.menuButton {
+	background: transparent;
+	border: 0;
+	color: inherit;
+	cursor: pointer;
+	padding: 0;
+}
+
+.chevronButton {
+	align-items: center;
+	border-radius: 4px;
+	display: inline-flex;
+	height: 18px;
+	justify-content: center;
+	width: 18px;
+}
+
+.chevronButton:hover {
+	background: rgb(255 255 255 / 0.45);
+}
+
+.chevron {
+	color: var(--text-secondary);
+	font-size: 16px;
+	line-height: 1;
+	transform: rotate(0deg);
+	transition: transform 160ms ease;
+}
+
+.chevronButtonExpanded .chevron {
+	transform: rotate(90deg);
+}
+
+.content {
+	min-width: 0;
+}
+
+.labelRow {
+	align-items: center;
+	display: flex;
+	gap: 8px;
+	min-width: 0;
+	width: 100%;
+}
+
+.folderIcon {
+	color: var(--accent-orange);
+	flex: none;
+	height: 16px;
+	width: 16px;
+}
+
+.labelButton {
+	align-items: center;
+	display: inline-flex;
+	min-width: 0;
+	text-align: left;
+	width: 100%;
+}
+
+.label {
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.menuButton {
+	align-items: center;
+	border-radius: 6px;
+	color: var(--text-secondary);
+	display: inline-flex;
+	height: 24px;
+	justify-content: center;
+	opacity: 0;
+	transition: opacity 140ms ease, background-color 140ms ease;
+	width: 24px;
+}
+
+.row:hover .menuButton,
+.menuButton:focus-visible {
+	opacity: 1;
+}
+
+.menuButton:hover,
+.menuButton:focus-visible {
+	background: rgb(255 255 255 / 0.52);
+	outline: none;
+}
