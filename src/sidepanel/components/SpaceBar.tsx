@@ -129,6 +129,7 @@ export function SpaceBar({ onOpenImport, sidebarPosition }: SpaceBarProps) {
 	const [editingSpaceId, setEditingSpaceId] = useState<string | null>(null);
 	const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 	const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
+	const [headerMenuPos, setHeaderMenuPos] = useState<{ top: number; left: number } | null>(null);
 	const [showColorMenu, setShowColorMenu] = useState(false);
 	const [deleteCandidate, setDeleteCandidate] = useState<Space | null>(null);
 
@@ -239,7 +240,22 @@ export function SpaceBar({ onOpenImport, sidebarPosition }: SpaceBarProps) {
 							<button
 								type="button"
 								className={styles.menuButton}
-								onClick={() => {
+								onClick={(event) => {
+									const rect = event.currentTarget.getBoundingClientRect();
+									const menuWidth = 194;
+									const menuHeight = 280;
+									const vw = window.innerWidth;
+									const vh = window.innerHeight;
+
+									let left = Math.min(rect.left, vw - menuWidth - 8);
+									left = Math.max(8, left);
+
+									let top = rect.bottom + 6;
+									if (top + menuHeight > vh) {
+										top = Math.max(8, rect.top - menuHeight - 6);
+									}
+
+									setHeaderMenuPos({ top, left });
 									setIsHeaderMenuOpen((current) => !current);
 									setContextMenu(null);
 									setShowColorMenu(false);
@@ -248,8 +264,12 @@ export function SpaceBar({ onOpenImport, sidebarPosition }: SpaceBarProps) {
 							>
 								<span aria-hidden="true">⚙</span>
 							</button>
-							{isHeaderMenuOpen ? (
-								<div className={styles.headerMenu} role="menu">
+							{isHeaderMenuOpen && headerMenuPos ? (
+								<div
+									className={styles.headerMenu}
+									role="menu"
+									style={{ top: headerMenuPos.top, left: headerMenuPos.left }}
+								>
 									<button
 										type="button"
 										className={styles.menuItem}
