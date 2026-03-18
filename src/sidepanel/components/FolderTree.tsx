@@ -137,7 +137,6 @@ export function FolderTree({ onOpenImport }: FolderTreeProps) {
 	const addBookmark = useAppStore((state) => state.addBookmark);
 	const deleteBookmark = useAppStore((state) => state.deleteBookmark);
 	const deleteFolder = useAppStore((state) => state.deleteFolder);
-	const collapseAllFolders = useAppStore((state) => state.collapseAllFolders);
 	const { activeItem, preview } = useTreeDnd();
 	const activeSpace = spaces.find((space) => space.id === activeSpaceId) ?? null;
 	const toastTimeoutRef = useRef<number | null>(null);
@@ -308,19 +307,6 @@ export function FolderTree({ onOpenImport }: FolderTreeProps) {
 					}}
 				>
 					+ Add Current Tab
-				</button>
-				<button
-					type="button"
-					className={styles.collapseButton}
-					onClick={collapseAllFolders}
-					title="Collapse all folders"
-				>
-					<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-						<polyline points="4 14 10 14 10 20" />
-						<polyline points="20 10 14 10 14 4" />
-						<line x1="14" y1="10" x2="21" y2="3" />
-						<line x1="3" y1="21" x2="10" y2="14" />
-					</svg>
 				</button>
 			</div>
 

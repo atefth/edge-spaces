@@ -84,7 +84,6 @@
 	display: inline-flex;
 	gap: 6px;
 	min-width: 100%;
-	padding-right: var(--spacing-md);
 	white-space: nowrap;
 }
 
@@ -102,6 +101,12 @@
 	position: relative;
 }
 
+.wrapper[data-sidebar-position='left'] .tabShell,
+.wrapper[data-sidebar-position='right'] .tabShell {
+	max-width: none;
+	width: 100%;
+}
+
 .tab {
 	background: rgb(255 255 255 / 0.18);
 	border: 0;
@@ -111,7 +116,6 @@
 	display: block;
 	font-size: var(--font-size-md);
 	font-weight: 600;
-	min-width: 88px;
 	overflow: hidden;
 	padding: 10px 12px 11px;
 	position: relative;

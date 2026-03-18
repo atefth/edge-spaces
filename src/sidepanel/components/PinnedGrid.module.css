@@ -19,8 +19,7 @@
 .grid {
 	display: grid;
 	gap: var(--spacing-sm);
-	grid-template-columns: repeat(4, 48px);
-	justify-content: space-between;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
 	min-height: 48px;
 	width: 100%;
 }
@@ -30,7 +29,6 @@
 	display: flex;
 	justify-content: center;
 	position: relative;
-	width: 48px;
 }
 
 .siteCellDragging {
@@ -53,10 +51,11 @@
 	display: inline-flex;
 	height: 48px;
 	justify-content: center;
+	max-width: 64px;
 	padding: 0;
 	position: relative;
 	transition: background-color var(--transition-normal), transform var(--transition-fast), box-shadow var(--transition-normal), border-color var(--transition-normal);
-	width: 48px;
+	width: 100%;
 }
 
 .siteButton:hover,

@@ -181,15 +181,6 @@ export function FolderItem({
 					openMenu(event.clientX, event.clientY);
 				}}
 			>
-				<button
-					type="button"
-					className={`${styles.chevronButton} ${folder.expanded ? styles.chevronButtonExpanded : ''}`}
-					onClick={() => toggleFolder(folder.id)}
-					aria-label={folder.expanded ? 'Collapse folder' : 'Expand folder'}
-				>
-					<span className={styles.chevron}>›</span>
-				</button>
-
 				<div className={styles.content}>
 					<div className={styles.labelRow}>
 						<FolderIcon expanded={folder.expanded} />

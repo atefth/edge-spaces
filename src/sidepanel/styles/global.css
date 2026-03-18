@@ -8,6 +8,7 @@ html,
 body,
 #root {
   min-height: 100%;
+  overflow-x: hidden;
   width: 100%;
 }
 
@@ -24,7 +25,6 @@ body {
   font-family: var(--font-family);
   font-size: var(--font-size-md);
   line-height: 1.4;
-  min-width: 320px;
   overflow-y: auto;
   transition: background var(--transition-slow), color var(--transition-normal);
 }
