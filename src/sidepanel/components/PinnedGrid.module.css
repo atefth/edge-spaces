@@ -1,5 +1,6 @@
 .panel {
 	position: relative;
+	width: 100%;
 }
 
 .srOnly {
@@ -18,13 +19,16 @@
 .grid {
 	display: grid;
 	gap: var(--spacing-sm);
-	grid-template-columns: repeat(4, minmax(0, 48px));
-	justify-content: flex-start;
+	grid-template-columns: repeat(4, 48px);
+	justify-content: space-between;
 	min-height: 48px;
+	width: 100%;
 }
 
 .siteCell,
 .addCell {
+	display: flex;
+	justify-content: center;
 	position: relative;
 	width: 48px;
 }

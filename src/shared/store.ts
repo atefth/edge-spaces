@@ -24,6 +24,7 @@ import type {
 interface AppActions {
 	hydrate(): Promise<void>;
 	setTheme(theme: ThemePreference): void;
+	setSidebarPosition(position: 'left' | 'right' | 'top'): void;
 	setActiveSpace(spaceId: string): void;
 	addSpace(name: string, color: SpaceColor): void;
 	renameSpace(spaceId: string, name: string): void;
@@ -37,6 +38,7 @@ interface AppActions {
 	deleteFolder(folderId: string): void;
 	toggleFolder(folderId: string): void;
 	addBookmark(spaceId: string, parentId: string, title: string, url: string): void;
+	collapseAllFolders(): void;
 	updateBookmark(bookmarkId: string, updates: Partial<Pick<Bookmark, 'title' | 'url'>>): void;
 	deleteBookmark(bookmarkId: string): void;
 	moveItem(itemId: string, itemType: TreeItemType, newParentId: string | null, newSpaceId: string, newIndex: number): void;
@@ -53,6 +55,7 @@ const initialState: AppState = {
 	activeSpaceId: '',
 	searchQuery: '',
 	theme: 'auto',
+	sidebarPosition: 'left',
 	version: STORAGE_VERSION,
 };
 
@@ -108,6 +111,7 @@ function extractStorageData(state: AppState): StorageData {
 function extractPreferences(state: AppState): PreferencesData {
 	return {
 		theme: state.theme,
+		sidebarPosition: state.sidebarPosition,
 	};
 }
 
@@ -252,7 +256,7 @@ function isDescendantFolder(folderId: string, possibleAncestorId: string, folder
 	return false;
 }
 
-function normalizeStorageData(data: StorageData): Omit<AppState, 'theme'> {
+function normalizeStorageData(data: StorageData): Omit<AppState, 'theme' | 'sidebarPosition'> {
 	const hasActiveSpace = data.spaces.some((space) => space.id === data.activeSpaceId);
 
 	return {
@@ -291,6 +295,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
 		set({
 			...nextState,
 			theme: loadedPrefs?.theme ?? storageService.getDefaultPrefs().theme,
+			sidebarPosition: loadedPrefs?.sidebarPosition ?? storageService.getDefaultPrefs().sidebarPosition,
 		});
 
 		if (!loadedState) {
@@ -304,6 +309,11 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
 	setTheme(theme) {
 		set({ theme });
+		persistPrefsFromStore();
+	},
+
+	setSidebarPosition(sidebarPosition) {
+		set({ sidebarPosition });
 		persistPrefsFromStore();
 	},
 
@@ -513,7 +523,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
 			parentId,
 			name: trimmedName,
 			childIds: [],
-			expanded: true,
+			expanded: false,
 			createdAt: Date.now(),
 		};
 
@@ -538,7 +548,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
 				nextFolders[parentId] = {
 					...currentState.folders[parentId],
 					childIds: [...currentState.folders[parentId].childIds, newFolder.id],
-					expanded: true,
 				};
 			}
 
@@ -673,7 +682,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
 				[parentId]: {
 					...currentState.folders[parentId],
 					childIds: [...currentState.folders[parentId].childIds, newBookmark.id],
-					expanded: true,
 				},
 			},
 		}));
@@ -874,6 +882,23 @@ export const useAppStore = create<AppStore>((set, get) => ({
 			spaces: nextSpaces,
 			folders: nextFolders,
 			bookmarks: nextBookmarks,
+		});
+
+		persistFromStore();
+	},
+
+	collapseAllFolders() {
+		set((state) => {
+			const nextFolders = { ...state.folders };
+
+			for (const folderId in nextFolders) {
+				nextFolders[folderId] = {
+					...nextFolders[folderId],
+					expanded: false,
+				};
+			}
+
+			return { folders: nextFolders };
 		});
 
 		persistFromStore();

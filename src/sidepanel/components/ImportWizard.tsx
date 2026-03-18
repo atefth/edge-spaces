@@ -27,17 +27,7 @@ function getFocusableElements(container: HTMLElement): HTMLElement[] {
 }
 
 function getInitialExpandedKeys(result: ParseResult): Set<string> {
-	const keys = new Set<string>();
-
-	for (const [spaceIndex, space] of result.spaces.entries()) {
-		keys.add(`space-${spaceIndex}`);
-
-		for (const [folderIndex] of space.rootFolders.entries()) {
-			keys.add(`space-${spaceIndex}-folder-${folderIndex}`);
-		}
-	}
-
-	return keys;
+	return new Set<string>();
 }
 
 function TreePreview({

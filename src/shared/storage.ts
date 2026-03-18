@@ -42,7 +42,10 @@ function isPreferencesData(value: unknown): value is PreferencesData {
 
 	const candidate = value as Partial<PreferencesData>;
 
-	return candidate.theme === 'auto' || candidate.theme === 'light' || candidate.theme === 'dark';
+	return (
+		(candidate.theme === 'auto' || candidate.theme === 'light' || candidate.theme === 'dark') &&
+		(candidate.sidebarPosition === 'left' || candidate.sidebarPosition === 'right' || candidate.sidebarPosition === 'top')
+	);
 }
 
 class StorageService {
@@ -105,6 +108,7 @@ class StorageService {
 	getDefaultPrefs(): PreferencesData {
 		return {
 			theme: 'auto',
+			sidebarPosition: 'left',
 		};
 	}
 

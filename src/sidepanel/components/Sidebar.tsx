@@ -16,6 +16,7 @@ export function Sidebar() {
 	const activeSpaceId = useAppStore((state) => state.activeSpaceId);
 	const spaces = useAppStore((state) => state.spaces);
 	const theme = useAppStore((state) => state.theme);
+	const sidebarPosition = useAppStore((state) => state.sidebarPosition);
 	const [isHydrating, setIsHydrating] = useState(true);
 	const [isImportOpen, setIsImportOpen] = useState(false);
 	const searchInputRef = useRef<HTMLInputElement>(null);
@@ -30,6 +31,12 @@ export function Sidebar() {
 		void hydrate().finally(() => {
 			if (isMounted) {
 				setIsHydrating(false);
+
+				const hasCollapsedOnce = localStorage.getItem('es_has_collapsed_once');
+				if (!hasCollapsedOnce) {
+					useAppStore.getState().collapseAllFolders();
+					localStorage.setItem('es_has_collapsed_once', 'true');
+				}
 			}
 		});
 
@@ -81,13 +88,10 @@ export function Sidebar() {
 		>
 			<div
 				className={styles.sidebarContent}
+				data-sidebar-position={sidebarPosition}
 				style={{ 
 					pointerEvents: isImportOpen ? 'none' : undefined,
 					userSelect: isImportOpen ? 'none' : undefined,
-					display: 'flex',
-					flexDirection: 'column',
-					flex: 1,
-					minHeight: '100vh',
 					filter: isImportOpen ? 'blur(8px)' : undefined,
 					transition: 'filter 200ms ease',
 					position: isImportOpen ? 'relative' : undefined,
@@ -101,7 +105,7 @@ export function Sidebar() {
 					</div>
 				) : (
 					<TreeDndProvider>
-						<SpaceBar onOpenImport={() => setIsImportOpen(true)} />
+						<SpaceBar onOpenImport={() => setIsImportOpen(true)} sidebarPosition={sidebarPosition} />
 						<SpaceContent ref={searchInputRef} onOpenImport={() => setIsImportOpen(true)} />
 					</TreeDndProvider>
 				)}

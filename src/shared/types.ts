@@ -51,6 +51,7 @@ export interface AppState {
 	activeSpaceId: string;
 	searchQuery: string;
 	theme: ThemePreference;
+	sidebarPosition: 'left' | 'right' | 'top';
 	version: number;
 }
 
@@ -64,4 +65,5 @@ export interface StorageData {
 
 export interface PreferencesData {
 	theme: ThemePreference;
+	sidebarPosition: 'left' | 'right' | 'top';
 }

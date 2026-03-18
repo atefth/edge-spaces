@@ -22,7 +22,17 @@ interface FolderItemProps {
 	onShowStatus: (message: string) => void;
 }
 
-function FolderIcon() {
+function FolderIcon({ expanded }: { expanded: boolean }) {
+	if (expanded) {
+		return (
+			<svg viewBox="0 0 24 24" className={styles.folderIcon} aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+				<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" fill="currentColor" opacity="0.2" />
+				<path d="M2 10s2.5 2 5 2 5-2 5-2 2.5 2 5 2 5-2 5-2" />
+				<path d="M20 6h-8.263l-1.855-2.47a1 1 0 0 0-.8-.4H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2Z" />
+			</svg>
+		);
+	}
+
 	return (
 		<svg viewBox="0 0 24 24" className={styles.folderIcon} aria-hidden="true">
 			<path d="M3.75 7.25h5l1.45 1.8H20a1.75 1.75 0 0 1 1.75 1.75v5.95A2.5 2.5 0 0 1 19.25 19H4.75a2.5 2.5 0 0 1-2.5-2.5V9a1.75 1.75 0 0 1 1.5-1.75Z" fill="currentColor" opacity="0.26" />
@@ -115,9 +125,6 @@ export function FolderItem({
 		}
 
 		createBookmarkFromTemplate(activeTab?.title?.trim() || 'Current Tab', url);
-		if (!folder.expanded) {
-			toggleFolder(folder.id);
-		}
 		onShowStatus(`Bookmark added to ${folder.name}`);
 	}
 
@@ -185,7 +192,7 @@ export function FolderItem({
 
 				<div className={styles.content}>
 					<div className={styles.labelRow}>
-						<FolderIcon />
+						<FolderIcon expanded={folder.expanded} />
 						{isEditing ? (
 							<InlineEdit
 								value={folder.name}

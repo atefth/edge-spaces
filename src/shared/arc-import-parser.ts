@@ -543,7 +543,7 @@ function createFolderTree({
 		parentId,
 		name: parsedFolder.name,
 		childIds,
-		expanded: true,
+		expanded: false,
 		createdAt,
 	};
 

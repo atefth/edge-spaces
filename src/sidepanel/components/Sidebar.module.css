@@ -12,12 +12,29 @@
 	transition: background var(--transition-slow);
 }
 
+.sidebarContent {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.sidebarContent[data-sidebar-position='left'] {
+	flex-direction: row;
+}
+
+.sidebarContent[data-sidebar-position='right'] {
+	flex-direction: row-reverse;
+}
+
 .loadingState {
 	align-items: center;
 	display: flex;
 	flex: 1;
+	height: 100vh;
 	justify-content: center;
 	padding: var(--spacing-xl);
+	width: 100%;
 }
 
 .loadingLabel {

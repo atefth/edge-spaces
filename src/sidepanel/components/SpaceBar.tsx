@@ -19,6 +19,7 @@ interface ContextMenuState {
 
 interface SpaceBarProps {
 	onOpenImport: () => void;
+	sidebarPosition: 'left' | 'right' | 'top';
 }
 
 function getAccentColor(color: SpaceColor): string {
@@ -37,6 +38,7 @@ interface SpaceTabProps {
 	onStartRename: (spaceId: string) => void;
 	onRename: (spaceId: string, nextName: string) => void;
 	onCancelRename: () => void;
+	sidebarPosition: 'left' | 'right' | 'top';
 }
 
 function SpaceTab({
@@ -49,6 +51,7 @@ function SpaceTab({
 	onStartRename,
 	onRename,
 	onCancelRename,
+	sidebarPosition,
 }: SpaceTabProps) {
 	const { activeItem, instructionsId, preview } = useTreeDnd();
 	const { setNodeRef } = useDroppable({
@@ -96,7 +99,9 @@ function SpaceTab({
 					/>
 				) : (
 					<>
-						<span className={styles.tabLabel}>{space.name}</span>
+						<span className={styles.tabLabel}>
+							{sidebarPosition === 'top' ? space.name : (space.name.charAt(0).toUpperCase() || '?')}
+						</span>
 						<span className={styles.tabUnderline} aria-hidden="true" />
 					</>
 				)}
@@ -105,16 +110,18 @@ function SpaceTab({
 	);
 }
 
-export function SpaceBar({ onOpenImport }: SpaceBarProps) {
+export function SpaceBar({ onOpenImport, sidebarPosition }: SpaceBarProps) {
 	const spaces = useAppStore((state) => state.spaces);
 	const activeSpaceId = useAppStore((state) => state.activeSpaceId);
 	const theme = useAppStore((state) => state.theme);
+	const sidebarPositionFromStore = useAppStore((state) => state.sidebarPosition);
 	const addSpace = useAppStore((state) => state.addSpace);
 	const deleteSpace = useAppStore((state) => state.deleteSpace);
 	const renameSpace = useAppStore((state) => state.renameSpace);
 	const setActiveSpace = useAppStore((state) => state.setActiveSpace);
 	const setSpaceColor = useAppStore((state) => state.setSpaceColor);
 	const setTheme = useAppStore((state) => state.setTheme);
+	const setSidebarPosition = useAppStore((state) => state.setSidebarPosition);
 	const scrollRegionRef = useRef<HTMLDivElement>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
 	const headerMenuRef = useRef<HTMLDivElement>(null);
@@ -224,7 +231,7 @@ export function SpaceBar({ onOpenImport }: SpaceBarProps) {
 
 	return (
 		<>
-			<div className={styles.wrapper}>
+			<div className={styles.wrapper} data-sidebar-position={sidebarPosition}>
 				<div className={styles.headerRow}>
 					<div className={styles.panelLabel}>Spaces</div>
 					<div className={styles.headerActions}>
@@ -268,6 +275,21 @@ export function SpaceBar({ onOpenImport }: SpaceBarProps) {
 											{theme === candidateTheme ? <span className={styles.menuSelectedMark}>✓</span> : null}
 										</button>
 									))}
+									<div className={styles.menuSectionLabel}>Sidebar Position</div>
+									{(['left', 'right', 'top'] as const).map((pos) => (
+										<button
+											key={pos}
+											type="button"
+											className={`${styles.menuItem} ${sidebarPositionFromStore === pos ? styles.menuItemSelected : ''}`}
+											onClick={() => {
+												setSidebarPosition(pos);
+												setIsHeaderMenuOpen(false);
+											}}
+										>
+											<span>{pos[0].toUpperCase() + pos.slice(1)}</span>
+											{sidebarPositionFromStore === pos ? <span className={styles.menuSelectedMark}>✓</span> : null}
+										</button>
+									))}
 								</div>
 							) : null}
 						</div>
@@ -299,6 +321,7 @@ export function SpaceBar({ onOpenImport }: SpaceBarProps) {
 										setEditingSpaceId(null);
 									}}
 									onCancelRename={() => setEditingSpaceId(null)}
+									sidebarPosition={sidebarPosition}
 								/>
 							);
 						})}
